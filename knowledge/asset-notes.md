@@ -25,7 +25,14 @@ The FBX files carry four material slots: `ModularBlock_Base`, `Base_Side`, `Gate
 - No audio is supplied, so the sound and music toggles can only store and show their state.
 - No font is supplied.
 - Mesh names in `WallAndDoor.fbx` mix cases and carry export leftovers (`Corner_1`, `corner_3`, `corner_3.002`).
+- The models do not share an up axis: block parts have -Z up, and the door and the frame corner lie upside down. Each needs its own correction in code.
+- The ground tile is slightly smaller than a cell (1.953 against 2 units), which leaves gaps between tiles.
 
-## To check
+## Measured in the project
 
-- Which corner mesh is the outer corner and which the inner corner, and the pivot and size of each part, once they are placed in a scene.
+- One board cell is 2 units. `Grid` is 1.953 units wide, so neighbouring ground tiles leave a thin gap; a flat base under the tiles fills it.
+- The block parts are a quarter of a cell (1 x 1 unit) and are authored with -Z up, so they are turned 90 degrees around X. Upright, a block reaches from 0.655 below its origin to 0.963 above it.
+- `ModularBlock_Edge` has its wall on +Z, `ModularBlock_OuterCorner` its corner on (+X, +Z). `ModularBlock_InnerCorner` has its pivot on the concave corner, covers the three other quarters around it, and its rounding reaches 0.16 units into the empty quarter.
+- `Wall` is a 1 x 3.58 x 1 box. `Door_1x1` is 2 units long, so one piece spans one cell; `Corner_1` is 1 x 1. Door and corner are authored with the rounded end down and are turned over; the frame top sits 1.24 units above the ground.
+- `Door_Arrow` points to +Z and is used as authored.
+- `BlockParts.fbx` and `GroundGrid.fbx` are imported with `Read/Write` on, because block and ground meshes are combined at run time.

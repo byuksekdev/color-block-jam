@@ -49,8 +49,12 @@ Entry format:
 **Decision:** what the editor may do to a level (place and move a block, place a door, resize the board) lives in `Scripts/Core/Editing/` and is tested there. The window only shows the level and forwards the designer's input. Each board tool is one class behind a small interface, and every change goes through one method that records an undo step.
 **Why:** the editor follows the same separation as the game, so an editing rule cannot differ between two tools, and a new tool is one new class.
 
+## Play starts from the level editor
+**Decision:** the Play button of the editor saves the open level, enters Play Mode in the game scene whichever scene is open, and starts that level directly. In Play Mode the button switches the running game to the open level. The button is off while the level check lists a problem.
+**Why:** the designer tries a level with one click and never plays a level the game would refuse. The request is kept in the editor session because entering Play Mode reloads the editor's code; the game itself knows nothing about the editor.
+
 ## One palette for block colours
-**Decision:** a `BlockPalette` asset maps each block colour to how it looks. The game and the level editor both read it.
+**Decision:** a `BlockPalette` asset maps each block colour to its material. The game draws blocks and doors with that material, and the level editor draws them flat in the material's colour.
 **Why:** the designer sees in the editor the colours the player sees in the game, and a colour is changed in one place.
 
 ## Rules run on grid cells; the view moves smoothly
@@ -69,6 +73,19 @@ Entry format:
 ## Each attempt is a new session
 **Decision:** starting or restarting a level builds a new session object from the level data, and the board view is rebuilt from that session.
 **Why:** the brief requires that no data stays from the previous attempt. Nothing is reset field by field, so nothing can be forgotten.
+
+## The board is built from the session, with a kit of parts
+**Decision:** the board view builds everything a level shows (ground, frame, doors, blocks) when a session starts, from the session's read-only board and one `BoardKit` asset that names the supplied meshes and the materials. No level has scene content or a prefab of its own.
+**Why:** a level file is enough to show a level, so a level made in the editor plays without any other step, and a board of any size uses the same code path. Swapping art is a change to the kit asset.
+
+## A block is one mesh made of quarter parts
+**Decision:** each cell of a block is four quarters. A quarter gets the supplied part that fits its neighbours (flat centre, straight edge, outer corner, inner corner), and the parts of a block are combined into one mesh when the board is built.
+**Why:** any shape made of cells gets rounded outer corners and correct inner corners without new art, and a block is one renderer instead of up to four per cell. The source models are readable at run time for this (`Read/Write` is on in their import settings).
+**Alternatives:** one prefab per shape, which needs new art for every new shape; one object per part, which multiplies the renderers.
+
+## The camera frames the board
+**Decision:** the camera keeps a fixed tilt and moves back until the board with its frame fits a rectangle of the screen that leaves room for the HUD above and the boosters below. The touch position is projected onto the plane of the block tops.
+**Why:** boards of different sizes and screens of different aspect ratios need no per-level or per-device camera values.
 
 ## One scene, one composition root
 **Decision:** `GameScene` is the only scene; home, gameplay and the popups are screens switched on and off. One bootstrap object constructs the logic objects and passes them to the views.
