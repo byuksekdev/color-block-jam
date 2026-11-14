@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(**/*.unity)",
+      "Edit(**/*.prefab)",
+      "Edit(**/*.asset)",
+      "Edit(**/*.meta)",
+      "Edit(Assets/**/Levels/**)"
+    ],
+    "ask": [
+      "Edit(Assets/Plugins/**)",
+      "Edit(Assets/TextMesh Pro/**)",
+      "Edit(Packages/**)",
+      "Edit(ProjectSettings/**)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(git rebase:*)",
+      "Bash(git stash:*)",
+      "Bash(git switch:*)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}
