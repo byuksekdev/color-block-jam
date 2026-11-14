@@ -47,14 +47,15 @@ When two options tie, pick the one that scores higher up this list. Optional sco
 
 ## Unity
 
-- Never hand-edit `.unity`, `.prefab`, `.asset` or `.meta` files, with an edit tool or from the shell. Print the exact Editor steps (menu path, object, component, field, value) and stop.
-- No tool here can drive the Editor: there is no MCP for Unity 2022, and batch mode needs the Editor closed. An agent cannot compile Unity code, enter Play Mode or use the Test Runner. The user does that and pastes the result.
-- The exception is `Scripts/Core/`: it is engine-free, so an agent builds it and runs its tests with `dotnet` in a scratch folder outside the repository (`.claude/rules/tests.md`).
+- Never hand-edit `.unity`, `.prefab`, `.asset` or `.meta` files, with an edit tool or from the shell. They change only through the Editor.
+- When the session has Unity Editor tools (an MCP server connected to the open Editor), use them: build scene, prefab and asset content, read the Console, run the EditMode tests, enter Play Mode. Do not save a scene the request did not ask to change, and remove any object made only for a check.
+- Without Editor tools, print the exact Editor steps (menu path, object, component, field, value) and stop. The user compiles, tests and pastes the result.
+- `Scripts/Core/` is engine-free, so an agent can also build it and run its tests with `dotnet` in a scratch folder outside the repository (`.claude/rules/tests.md`).
 - New `.cs` files get their `.meta` from Unity on the next import; do not write one.
 
 ## Evidence
 
-Claim only what was run. An agent here can read code, so the honest wording is "written, not compiled". "Compiles" needs the user's clean Console. "Tests pass" needs the Test Runner summary the user pasted. "Works" needs Play Mode or a device. For `Scripts/Core/`, "builds and its tests pass with `dotnet`" is a valid claim when that was run; it is not a Unity compile. Saying less is a complete answer.
+Claim only what was run. Code that was only read or written is "written, not compiled". "Compiles" needs a clean Console. "Tests pass" needs the Test Runner summary. "Works" needs Play Mode or a device. Each comes from the Editor tools in this session or from what the user pasted. For `Scripts/Core/`, "builds and its tests pass with `dotnet`" is a valid claim when that was run; it is not a Unity compile. Saying less is a complete answer.
 
 ## Git
 
