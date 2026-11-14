@@ -5,12 +5,12 @@ using UnityEngine;
 namespace ColorBlockJam.Game.Visuals
 {
     [Serializable]
-    public sealed class BlockTint
+    public sealed class BlockLook
     {
         [SerializeField] private BlockColor _blockColor;
-        [SerializeField] private Color _tint = Color.white;
+        [SerializeField] private Material _material;
 
         public BlockColor BlockColor => _blockColor;
-        public Color Tint => _tint;
+        public Material Material => _material;
     }
 }

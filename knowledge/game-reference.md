@@ -20,13 +20,13 @@ All five boards are rectangles without holes, and every timer starts at 05:00.
 
 | Level | Board | Blocks | Doors |
 |---|---|---|---|
-| 1 | 4 x 5 | blue 2x2, purple 2x2 | blue on top (3 cells), purple on the bottom (3 cells) |
+| 1 | 4 x 5 | blue 2x2, pink 2x2 | blue on top (3 cells), pink on the bottom (3 cells) |
 | 2 | 5 x 5 | green 1x3, orange 1x3, both upright | green on top (3 cells), orange on the bottom (3 cells) |
 | 3 | 5 x 6 | blue L (4 cells), red 1x2, yellow L (4 cells) | blue on top, red on the left and on the right, yellow on the bottom |
 | 4 | 5 x 6 | blue 2x2, orange 1x2, yellow 2x2 | yellow on top, orange on the left and on the right, blue on the bottom |
-| 5 | 5 x 6 | light blue 1x3, green 2x2, purple 2x2, orange 3x1, red 3x1 | purple and green on top, orange on the left, red on the right, light blue on the bottom |
+| 5 | 5 x 6 | light blue 1x3, green 2x2, pink 2x2, orange 3x1, red 3x1 | pink and green on top, orange on the left, red on the right, light blue on the bottom |
 
-Level 1 in detail (columns from the left, rows from the top): the blue block covers columns 3 to 4 of rows 2 to 3; the purple block covers columns 1 to 2 of rows 3 to 4; the blue door spans columns 2 to 4 of the top side; the purple door spans columns 1 to 3 of the bottom side.
+Level 1 in detail (columns from the left, rows from the top): the blue block covers columns 3 to 4 of rows 2 to 3; the pink block covers columns 1 to 2 of rows 3 to 4; the blue door spans columns 2 to 4 of the top side; the pink door spans columns 1 to 3 of the bottom side.
 
 ## Outside the required scope
 

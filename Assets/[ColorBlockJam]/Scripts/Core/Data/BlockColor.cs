@@ -10,6 +10,6 @@ namespace ColorBlockJam.Core.Data
         DarkGreen = 5,
         LightBlue = 6,
         Blue = 7,
-        Purple = 8,
+        Pink = 8,
     }
 }

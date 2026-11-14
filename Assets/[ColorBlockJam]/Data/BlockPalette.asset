@@ -12,20 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 519179c2aeb344299a538fd022325a20, type: 3}
   m_Name: BlockPalette
   m_EditorClassIdentifier: 
-  _tints:
+  _looks:
   - _blockColor: 1
-    _tint: {r: 0.86, g: 0.16, b: 0.19, a: 1}
+    _material: {fileID: 2100000, guid: 9d23fa72f597d42ab9e81144dd77d096, type: 2}
   - _blockColor: 2
-    _tint: {r: 0.96, g: 0.45, b: 0.12, a: 1}
+    _material: {fileID: 2100000, guid: 06c6f6e246fe441328af980ea483bc32, type: 2}
   - _blockColor: 3
-    _tint: {r: 0.98, g: 0.74, b: 0.1, a: 1}
+    _material: {fileID: 2100000, guid: b1a0f1471242247f7b135f45b4b20100, type: 2}
   - _blockColor: 4
-    _tint: {r: 0.27, g: 0.75, b: 0.18, a: 1}
+    _material: {fileID: 2100000, guid: 74e65e16587974fa297aed48c54138b8, type: 2}
   - _blockColor: 5
-    _tint: {r: 0.1, g: 0.45, b: 0.2, a: 1}
+    _material: {fileID: 2100000, guid: faeb5fc6b9bbe492591961de2c18ee57, type: 2}
   - _blockColor: 6
-    _tint: {r: 0.13, g: 0.68, b: 0.9, a: 1}
+    _material: {fileID: 2100000, guid: 4469c48046c6a46b7bac84efc487ad8f, type: 2}
   - _blockColor: 7
-    _tint: {r: 0.13, g: 0.27, b: 0.86, a: 1}
+    _material: {fileID: 2100000, guid: 209152ac55eb04cbe95cb9b7c7015fa9, type: 2}
   - _blockColor: 8
-    _tint: {r: 0.64, g: 0.19, b: 0.8, a: 1}
+    _material: {fileID: 2100000, guid: 51df5e1eeab77471eae89667537552d6, type: 2}
