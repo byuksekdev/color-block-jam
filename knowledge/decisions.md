@@ -45,6 +45,14 @@ Entry format:
 **Why:** the designer works where the level files live: save writes into the project and play is one button, with no code and no file editing.
 **Alternatives:** an editor scene inside the game. Files written on a device do not reach the project, and it needs a second set of runtime UI.
 
+## The editor window is a view; editing rules are logic
+**Decision:** what the editor may do to a level (place and move a block, place a door, resize the board) lives in `Scripts/Core/Editing/` and is tested there. The window only shows the level and forwards the designer's input. Each board tool is one class behind a small interface, and every change goes through one method that records an undo step.
+**Why:** the editor follows the same separation as the game, so an editing rule cannot differ between two tools, and a new tool is one new class.
+
+## One palette for block colours
+**Decision:** a `BlockPalette` asset maps each block colour to how it looks. The game and the level editor both read it.
+**Why:** the designer sees in the editor the colours the player sees in the game, and a colour is changed in one place.
+
 ## Rules run on grid cells; the view moves smoothly
 **Decision:** the logic owns every block position as grid cells. During a drag the view moves the block continuously and asks the logic how far it may go; collision is arithmetic on cell occupancy. On release the block snaps to the nearest cell. There is no physics and there are no colliders.
 **Why:** the rules are deterministic and testable without a scene, and no game state lives in transforms.

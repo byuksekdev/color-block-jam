@@ -1,0 +1,148 @@
+.level-editor {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    border-right-width: 1px;
+    border-right-color: rgba(0, 0, 0, 0.35);
+}
+
+.main {
+    flex-grow: 1;
+}
+
+.header {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 10px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.35);
+}
+
+.header-title {
+    flex-grow: 1;
+    font-size: 14px;
+    -unity-font-style: bold;
+}
+
+.board-canvas {
+    flex-grow: 1;
+}
+
+.empty-state {
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.panel {
+    padding: 8px 10px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+}
+
+.panel-title {
+    -unity-font-style: bold;
+    margin-top: 2px;
+    margin-bottom: 4px;
+}
+
+.button-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.button-row > Button {
+    flex-grow: 1;
+}
+
+.wrap-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.hint {
+    white-space: normal;
+    opacity: 0.7;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.tool-button.selected,
+.shape-button.selected {
+    background-color: rgb(58, 114, 176);
+    color: white;
+}
+
+.swatch {
+    width: 26px;
+    height: 26px;
+    margin: 2px;
+    border-radius: 5px;
+    border-width: 2px;
+    border-color: rgba(0, 0, 0, 0.4);
+}
+
+.swatch.selected {
+    border-color: white;
+}
+
+.shape-button {
+    width: 50px;
+    height: 50px;
+    margin: 2px;
+    padding: 0;
+}
+
+.shape-preview {
+    flex-grow: 1;
+}
+
+.chosen-shape {
+    width: 56px;
+    height: 56px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-right: 4px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.stepper,
+.timer-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.stepper-title {
+    width: 60px;
+}
+
+.stepper > Button {
+    width: 26px;
+}
+
+.stepper-value {
+    width: 30px;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
+
+.time-field {
+    width: 46px;
+}
+
+.problem {
+    white-space: normal;
+    color: rgb(255, 170, 60);
+    margin-bottom: 3px;
+}
+
+.problem-none {
+    color: rgb(110, 200, 110);
+}
