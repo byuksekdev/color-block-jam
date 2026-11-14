@@ -29,6 +29,7 @@ namespace ColorBlockJam.Tests
             _player = new PlayerProfile(_storage);
             _flow = new GameFlow(_player, _levels);
             _rewards = new List<int>();
+            _session = null;
             _flow.LevelStarted += session => _session = session;
             _flow.LevelWon += _rewards.Add;
         }
@@ -45,7 +46,6 @@ namespace ColorBlockJam.Tests
         {
             _flow.StartLevel();
 
-            Assert.IsTrue(_flow.IsInLevel);
             Assert.AreEqual(0, _flow.LevelIndex);
             Assert.AreEqual(SessionState.Ready, _session.State);
             CollectionAssert.AreEqual(new[] { 0 }, _levels.LoadedIndices);
@@ -109,6 +109,39 @@ namespace ColorBlockJam.Tests
         }
 
         [Test]
+        public void StartNextLevel_LevelNotWon_StaysOnTheLevel()
+        {
+            _flow.StartLevel();
+            LevelSession attempt = _session;
+
+            _flow.StartNextLevel();
+
+            Assert.AreSame(attempt, _session);
+            Assert.AreEqual(0, _flow.LevelIndex);
+        }
+
+        [Test]
+        public void StartNextLevel_PressedTwiceAfterAWin_MovesOneLevelOn()
+        {
+            _flow.StartLevel();
+            Win(_session);
+
+            _flow.StartNextLevel();
+            _flow.StartNextLevel();
+
+            Assert.AreEqual(1, _flow.LevelIndex);
+        }
+
+        [Test]
+        public void RestartLevel_OnTheHomeScreen_StartsNothing()
+        {
+            _flow.RestartLevel();
+
+            Assert.IsNull(_session);
+            CollectionAssert.IsEmpty(_levels.LoadedIndices);
+        }
+
+        [Test]
         public void RestartLevel_AfterAMoveAndSomeTime_GivesTheStateOfAFreshStart()
         {
             _flow.StartLevel();
@@ -169,7 +202,6 @@ namespace ColorBlockJam.Tests
             _flow.LeaveLevel();
             Win(leftAttempt);
 
-            Assert.IsFalse(_flow.IsInLevel);
             Assert.AreEqual(1, leaveCount);
             Assert.AreEqual(400, _player.Coins);
             CollectionAssert.IsEmpty(_rewards);

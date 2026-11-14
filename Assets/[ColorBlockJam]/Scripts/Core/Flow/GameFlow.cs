@@ -32,8 +32,6 @@ namespace ColorBlockJam.Core.Flow
         /// <summary>The index of the level being played. It keeps counting after the last level file.</summary>
         public int LevelIndex { get; private set; }
 
-        public bool IsInLevel => _session != null;
-
         /// <summary>Starts the level the player has reached.</summary>
         public void StartLevel()
         {
@@ -55,14 +53,22 @@ namespace ColorBlockJam.Core.Flow
             LevelStarted?.Invoke(_session);
         }
 
+        /// <summary>Starts the level being played again. Does nothing on the home screen.</summary>
         public void RestartLevel()
         {
-            StartLevel(LevelIndex);
+            if (_session != null)
+            {
+                StartLevel(LevelIndex);
+            }
         }
 
+        /// <summary>Starts the level after the one just won. Does nothing unless the level is won, so a second press cannot skip a level.</summary>
         public void StartNextLevel()
         {
-            StartLevel(LevelIndex + 1);
+            if (_session != null && _session.State == SessionState.Won)
+            {
+                StartLevel(LevelIndex + 1);
+            }
         }
 
         public void LeaveLevel()
