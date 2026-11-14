@@ -61,14 +61,14 @@ namespace ColorBlockJam.LevelEditor
 
         private static void StartLevel(int levelIndex)
         {
-            LevelRunner runner = Object.FindObjectOfType<LevelRunner>();
-            if (runner == null)
+            GameRoot game = Object.FindObjectOfType<GameRoot>();
+            if (game == null)
             {
-                Debug.LogWarning("The level cannot be played: the open scene has no " + nameof(LevelRunner) + ".");
+                Debug.LogWarning("The level cannot be played: the open scene has no " + nameof(GameRoot) + ".");
                 return;
             }
 
-            runner.StartLevel(levelIndex);
+            game.PlayLevel(levelIndex);
         }
 
         private static SceneAsset FindGameScene()

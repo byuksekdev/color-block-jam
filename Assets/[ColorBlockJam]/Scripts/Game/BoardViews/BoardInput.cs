@@ -1,13 +1,15 @@
+using System.Collections.Generic;
 using ColorBlockJam.Core.Boards;
 using ColorBlockJam.Core.Data;
 using ColorBlockJam.Core.Sessions;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace ColorBlockJam.Game.BoardViews
 {
     /// <summary>
     /// Turns one finger, or the mouse, into a drag of one block. It asks the session for every move
-    /// and shows what the session answers.
+    /// and shows what the session answers. A touch that begins on the UI does not reach the board.
     /// </summary>
     public sealed class BoardInput : MonoBehaviour
     {
@@ -16,6 +18,10 @@ namespace ColorBlockJam.Game.BoardViews
         private const int LeftMouseButton = 0;
 
         [SerializeField] private Camera _camera;
+        [SerializeField] private EventSystem _eventSystem;
+
+        private readonly List<RaycastResult> _uiHits = new List<RaycastResult>();
+        private PointerEventData _pointer;
 
         private LevelSession _session;
         private BoardView _board;
@@ -32,6 +38,11 @@ namespace ColorBlockJam.Game.BoardViews
             _heldBlock = NoBlock;
             _finger = NoFinger;
             _touchPlane = new Plane(Vector3.up, board.Space.Center + Vector3.up * BoardView.BlockTop);
+        }
+
+        private void Awake()
+        {
+            _pointer = new PointerEventData(_eventSystem);
         }
 
         /// <summary>Reads this frame's input. Call it before the session's Tick.</summary>
@@ -84,7 +95,7 @@ namespace ColorBlockJam.Game.BoardViews
 
         private bool TryGrab(Vector2 screenPosition)
         {
-            if (!TryGetBoardPoint(screenPosition, out BoardPoint point))
+            if (IsOverUi(screenPosition) || !TryGetBoardPoint(screenPosition, out BoardPoint point))
             {
                 return false;
             }
@@ -123,6 +134,14 @@ namespace ColorBlockJam.Game.BoardViews
 
             _heldBlock = NoBlock;
             _finger = NoFinger;
+        }
+
+        private bool IsOverUi(Vector2 screenPosition)
+        {
+            _pointer.position = screenPosition;
+            _uiHits.Clear();
+            _eventSystem.RaycastAll(_pointer, _uiHits);
+            return _uiHits.Count > 0;
         }
 
         private bool TryGetBoardPoint(Vector2 screenPosition, out BoardPoint point)

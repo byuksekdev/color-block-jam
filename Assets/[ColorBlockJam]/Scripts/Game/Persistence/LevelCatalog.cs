@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using ColorBlockJam.Core.Data;
+using ColorBlockJam.Core.Flow;
 using UnityEngine;
 
 namespace ColorBlockJam.Game.Persistence
 {
     /// <summary>The level files in play order. The level editor keeps this list; the game loads levels from it.</summary>
-    public sealed class LevelCatalog : ScriptableObject
+    public sealed class LevelCatalog : ScriptableObject, ILevelSource
     {
         [SerializeField] private List<TextAsset> _levels = new List<TextAsset>();
 
