@@ -146,3 +146,8 @@
 .problem-none {
     color: rgb(110, 200, 110);
 }
+
+.play-button {
+    margin-left: 6px;
+    -unity-font-style: bold;
+}

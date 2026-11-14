@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using ColorBlockJam.Core.Data;
 using ColorBlockJam.Core.Editing;
 using ColorBlockJam.Core.Validation;
@@ -19,7 +18,8 @@ namespace ColorBlockJam.LevelEditor
     internal sealed class LevelEditorWindow : EditorWindow, IEditingContext
     {
         private const string MenuPath = "Tools/Color Block Jam/Level Editor";
-        private const string StyleSheetFile = "LevelEditor.uss";
+        private const string WindowTitle = "Level Editor";
+        private const string UnsavedMark = " *";
         private const float MinWindowWidth = 760f;
         private const float MinWindowHeight = 560f;
         private const int RightMouseButton = 1;
@@ -46,8 +46,7 @@ namespace ColorBlockJam.LevelEditor
         private BoardSettingsPanel _settings;
         private ToolPanel _toolPanel;
         private ProblemsPanel _problems;
-        private Label _title;
-        private Button _saveButton;
+        private EditorHeader _header;
         private Label _emptyState;
 
         public LevelData Level => _level;
@@ -74,7 +73,7 @@ namespace ColorBlockJam.LevelEditor
         [MenuItem(MenuPath)]
         private static void Open()
         {
-            var window = GetWindow<LevelEditorWindow>("Level Editor");
+            var window = GetWindow<LevelEditorWindow>(WindowTitle);
             window.minSize = new Vector2(MinWindowWidth, MinWindowHeight);
         }
 
@@ -92,7 +91,7 @@ namespace ColorBlockJam.LevelEditor
         private void CreateGUI()
         {
             _library = new LevelLibrary();
-            _palette = FindPalette();
+            _palette = EditorAssets.FindPalette();
             _eraseTool = new EraseTool(this);
             _tools = new IBoardTool[] { new BlockTool(this), new DoorTool(this), new MoveTool(this), _eraseTool };
 
@@ -106,7 +105,7 @@ namespace ColorBlockJam.LevelEditor
             root.focusable = true;
             root.RegisterCallback<KeyDownEvent>(OnKeyDown);
 
-            StyleSheet styles = LoadStyleSheet();
+            StyleSheet styles = EditorAssets.LoadStyleSheet(this);
             if (styles != null)
             {
                 root.styleSheets.Add(styles);
@@ -155,14 +154,9 @@ namespace ColorBlockJam.LevelEditor
 
         private VisualElement BuildMain()
         {
-            _title = new Label();
-            _title.AddToClassList("header-title");
-            _saveButton = new Button(SaveLevel) { text = "Save" };
-
-            var header = new VisualElement();
-            header.AddToClassList("header");
-            header.Add(_title);
-            header.Add(_saveButton);
+            _header = new EditorHeader();
+            _header.SaveRequested += SaveLevel;
+            _header.PlayRequested += PlayLevel;
 
             _canvas = new BoardCanvas();
             _canvas.PointerPressed += (hit, button) => (button == RightMouseButton ? _eraseTool : ActiveTool).PointerDown(hit);
@@ -175,7 +169,7 @@ namespace ColorBlockJam.LevelEditor
 
             var main = new VisualElement();
             main.AddToClassList("main");
-            main.Add(header);
+            main.Add(_header);
             main.Add(_canvas);
             main.Add(_emptyState);
             return main;
@@ -238,6 +232,16 @@ namespace ColorBlockJam.LevelEditor
         {
             _library.Save(_file, _level);
             RefreshLevel();
+        }
+
+        private void PlayLevel()
+        {
+            if (hasUnsavedChanges)
+            {
+                SaveLevel();
+            }
+
+            LevelPlayback.Play(_library.IndexOf(_file));
         }
 
         private void LoadLevel(TextAsset file)
@@ -355,8 +359,6 @@ namespace ColorBlockJam.LevelEditor
         private void RefreshLevel()
         {
             hasUnsavedChanges = HasLevel && LevelSerializer.ToJson(_level) != _file.text;
-            _saveButton.SetEnabled(hasUnsavedChanges);
-            _title.text = HasLevel ? _file.name + (hasUnsavedChanges ? " *" : string.Empty) : "Level Editor";
 
             SetShown(_emptyState, !HasLevel);
             SetShown(_canvas, HasLevel);
@@ -364,32 +366,23 @@ namespace ColorBlockJam.LevelEditor
             SetShown(_toolPanel, HasLevel);
             SetShown(_problems, HasLevel);
 
-            if (HasLevel)
+            if (!HasLevel)
             {
-                _canvas.Show(_level, _palette);
-                _settings.Refresh(_level);
-                _problems.Refresh(LevelValidator.Validate(_level));
+                _header.Refresh(WindowTitle, false, false);
+                return;
             }
+
+            List<LevelProblem> problems = LevelValidator.Validate(_level);
+            string title = _file.name + (hasUnsavedChanges ? UnsavedMark : string.Empty);
+            _header.Refresh(title, hasUnsavedChanges, problems.Count == 0);
+            _canvas.Show(_level, _palette);
+            _settings.Refresh(_level);
+            _problems.Refresh(problems);
         }
 
         private static void SetShown(VisualElement element, bool isShown)
         {
             element.style.display = isShown ? DisplayStyle.Flex : DisplayStyle.None;
-        }
-
-        private static BlockPalette FindPalette()
-        {
-            string[] guids = AssetDatabase.FindAssets("t:" + nameof(BlockPalette));
-            return guids.Length > 0
-                ? AssetDatabase.LoadAssetAtPath<BlockPalette>(AssetDatabase.GUIDToAssetPath(guids[0]))
-                : null;
-        }
-
-        private StyleSheet LoadStyleSheet()
-        {
-            string scriptPath = AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this));
-            string folder = Path.GetDirectoryName(scriptPath).Replace('\\', '/');
-            return AssetDatabase.LoadAssetAtPath<StyleSheet>(folder + "/" + StyleSheetFile);
         }
     }
 }
