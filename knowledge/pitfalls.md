@@ -60,3 +60,8 @@ Failure modes that fit this project's stack (DOTween, Lean Pool, uGUI, a timer, 
 - A script moved or renamed outside the Editor loses its `.meta` and every scene and prefab reference to it. Move files inside Unity.
 - Unity rewrites `ProjectSettings/` and `Packages/packages-lock.json` on its own; look at the diff before committing so unrelated changes do not ride along.
 - An empty folder is not tracked by git, but its `.meta` is. Unity then deletes the orphan `.meta` on the reviewer's machine and shows a warning. Commit a folder only once it has content.
+
+## Rendering
+
+- The "Balanced" and "High Fidelity" renderers of the project template carry a screen space ambient occlusion feature. It adds a depth-normals pass, so every board mesh is drawn twice. The Editor plays at "High Fidelity"; Android is set to "Performant", which has no such feature, so the device looks slightly flatter than the Editor.
+- A UI sprite that is not in `UiAtlas` breaks the batch of its screen. Add new UI sprites to the atlas; sprites larger than 1024 pixels stay out of it.

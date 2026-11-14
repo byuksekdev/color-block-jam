@@ -120,7 +120,7 @@ Entry format:
 **Why:** the brief does not cover this case. The player did complete the level.
 
 ## Coin rules
-**Decision:** a new player starts with 400 coins. Winning the level the player has reached grants 40 coins, once, at the moment the level is won, and moves the player to the next level. A level that is played again, or started from the level editor, grants nothing and does not move the player. Nothing spends coins.
+**Decision:** a new player starts with 400 coins. Winning the level the player has reached grants 40 coins, once, at the moment the level is won, and moves the player to the next level. "Continue" works only on a won level, so pressing it twice cannot skip a level. A level that is played again, or started from the level editor, grants nothing and does not move the player. Nothing spends coins.
 **Why:** the brief requires a working coin inventory but names no source and no price. The values match the reference game. Granting at the state change keeps the count correct when the player leaves before pressing a button.
 
 ## Level 1 and the tutorial hint
@@ -134,6 +134,10 @@ Entry format:
 ## UI layout
 **Decision:** the canvas scales with the screen width from a 1080 x 1920 reference. Each screen keeps its content inside a panel that follows the device's safe area, and the bars are anchored to the top and the bottom of that panel. The camera leaves the top 22 percent and the bottom 20 percent of the screen to the HUD.
 **Why:** a taller screen only adds room between the bars, so the layout holds at 16:9 and at 20:9, and a notch covers nothing.
+
+## Android runs the lightest render settings
+**Decision:** on Android the game uses the "Performant" quality level: no HDR, no shadows, no ambient occlusion pass. All UI sprites that fit are packed into one sprite atlas.
+**Why:** the two heavier quality levels of the project template draw the board twice for ambient occlusion, which the flat look does not need. The atlas lets a screen's images share draw calls: the home screen went from 29 batches to 14.
 
 ## After the last level
 **Decision:** the level number keeps counting up and the level content starts again from the first file.
