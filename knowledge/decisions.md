@@ -54,6 +54,10 @@ Entry format:
 **Decision:** a block leaves through a door of its colour when it touches that door's side of the board, all of its cells lie inside the door's span, and no other block stands between any of its cells and the door. The logic removes the block first; the exit animation follows.
 **Why:** this matches the reference game, where a door may be wider than the block. Changing the state before animating keeps the rule independent of the animation.
 
+## Only the session changes the board
+**Decision:** the session owns the board state and hands it out as a read-only interface. A view asks the session to begin, move and end a drag, and learns about results from the session's events: state changed, block left, shown second changed.
+**Why:** a view cannot move or remove a block by itself, so every rule runs in one place and the views stay replaceable.
+
 ## Each attempt is a new session
 **Decision:** starting or restarting a level builds a new session object from the level data, and the board view is rebuilt from that session.
 **Why:** the brief requires that no data stays from the previous attempt. Nothing is reset field by field, so nothing can be forgotten.
