@@ -91,9 +91,25 @@ Entry format:
 **Decision:** `GameScene` is the only scene; home, gameplay and the popups are screens switched on and off. One bootstrap object constructs the logic objects and passes them to the views.
 **Why:** no scene loading between screens, and every dependency is visible in one place. There is no singleton and no service locator.
 
+## The flow between screens is logic
+**Decision:** `GameFlow` in `Scripts/Core/Flow/` starts, restarts and leaves levels and decides what a win is worth. The screens only show values and report button presses; one view class, `GameScreens`, shows the screen that fits the flow's events and passes each press on.
+**Why:** the acceptance criteria about restart, the next level and the coin count are rules, so they are tested without a scene. A screen can be redrawn or replaced without touching them.
+
+## Player data sits behind one storage interface
+**Decision:** coins, the reached level and the settings are one `PlayerData` object. `PlayerProfile` is the only code that changes it and saves it through `IPlayerStorage` after every change. The game stores it as one JSON text in PlayerPrefs. Settings are stored as the list of those switched off.
+**Why:** quitting at any moment loses nothing, a test replaces the storage with a fake, and moving to a file or a server is one new class. A setting added later starts switched on without a migration.
+
 ## Pause is a session state
 **Decision:** pause, win and fail are states of the session. The timer advances only in the playing state. `Time.timeScale` is not changed.
 **Why:** popups can animate while the game is paused, and the timer cannot run behind a popup.
+
+## The pause screen is the settings screen
+**Decision:** the pause button of a level opens the settings screen with an extra Home button. Closing it resumes the level. Restart is a button of its own on the HUD. The game also pauses when the app goes to the background.
+**Why:** this is how the reference game does it, and one screen serves both places.
+
+## A touch on the UI does not reach the board
+**Decision:** before a touch can pick up a block, the board input asks the event system whether a UI element lies under it.
+**Why:** a press on a HUD button or on a popup must not move the block behind it.
 
 ## The timer starts on the first touch
 **Decision:** the countdown begins when the player first touches the board, not when the level appears.
@@ -104,12 +120,20 @@ Entry format:
 **Why:** the brief does not cover this case. The player did complete the level.
 
 ## Coin rules
-**Decision:** a new player starts with 400 coins. Each completed level grants 40 coins, once, at the moment the level is won. Nothing spends coins.
+**Decision:** a new player starts with 400 coins. Winning the level the player has reached grants 40 coins, once, at the moment the level is won, and moves the player to the next level. A level that is played again, or started from the level editor, grants nothing and does not move the player. Nothing spends coins.
 **Why:** the brief requires a working coin inventory but names no source and no price. The values match the reference game. Granting at the state change keeps the count correct when the player leaves before pressing a button.
 
 ## Level 1 and the tutorial hint
 **Decision:** the five levels reproduce levels 1 to 5 of the reference game. The "Swipe to Gate" hand hint of level 1 is not implemented.
 **Why:** a tutorial is not in the required scope.
+
+## Home screen and popups
+**Decision:** the level button starts the level directly; the reference game's popup before a level, with its booster choice, is left out. The level path above the button, the profile box, the lives and the tabs are placeholders that react to a touch. The fail popup is our own design: "Time's Up!" with Try Again and Home.
+**Why:** the brief asks for a level button that starts the current level, and boosters and lives are outside the required scope.
+
+## UI layout
+**Decision:** the canvas scales with the screen width from a 1080 x 1920 reference. Each screen keeps its content inside a panel that follows the device's safe area, and the bars are anchored to the top and the bottom of that panel. The camera leaves the top 22 percent and the bottom 20 percent of the screen to the HUD.
+**Why:** a taller screen only adds room between the bars, so the layout holds at 16:9 and at 20:9, and a notch covers nothing.
 
 ## After the last level
 **Decision:** the level number keeps counting up and the level content starts again from the first file.

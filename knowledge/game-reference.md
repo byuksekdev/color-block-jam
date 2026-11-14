@@ -12,7 +12,15 @@ How the reference game, Color Block Jam, plays in its first levels. The layouts 
 
 ## Gameplay HUD
 
-Top: a level badge, the timer, a restart button and a pause button. Below them on the right: the coin count with a plus button. Bottom: four booster slots, locked, labelled Lv.6, Lv.8, Lv.12 and Lv.16.
+Top left: a round level badge joined to a "Time" panel with the timer. Top right: a restart button above a pause button, and below them the coin count with a plus button. Bottom: four booster slots, locked, labelled Lv.6, Lv.8, Lv.12 and Lv.16.
+
+The pause button opens the settings screen with an extra HOME button at the bottom.
+
+## Home and settings
+
+- Home, from the top: a profile box, the lives ("Full" with a heart and a count), the coins with a plus button and a gear for the settings. In the middle a path of the coming levels, locked, and under it a wide green "Level N" button. At the bottom five tabs: a locked tab, the shop, Home (raised and labelled), the collection and a tab locked until level 50.
+- The level button opens a popup with a booster choice and a Play button.
+- Settings: three switches (vibration, sound, music) that show "On", then the buttons Legal Terms, Restore Purchases, Support and Language, and a close button on the corner.
 
 ## Levels 1 to 5
 

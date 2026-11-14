@@ -18,12 +18,20 @@ The FBX files carry four material slots: `ModularBlock_Base`, `Base_Side`, `Gate
 - `VisualAssets/Textures/icetexture.jpg`: ice (optional scope).
 - `VisualAssets/UI/`: sprites for the home screen, the tab bar, the gameplay HUD, popups, the settings rows, coins and booster icons.
 
+## UI sprites in use
+
+- Nine UI sprites have slice borders set in their import settings so that one sprite serves different sizes: `bg_popup`, `bg_popup_info_holder`, `Btn_popup_green`, `Btn_popup_blue`, `Btn_level_green`, `bg_home_coin_holder`, `bg_home_resource_holder`, `bg_gameplay_time_holder`, `SquareRoundedMask`.
+- `Btn_levelBg_normal` is the level badge and timer of the HUD, `Btn_square_retry` the restart button and `Btn_settings_normal` the pause button. The home screen's settings button is `Settings_Icon` alone.
+- `VisualAssets/Fonts/UiText.mat` is a material of the TextMesh Pro default font with an outline; all UI text uses it.
+
 ## Feedback
 
 - `btn_toggle_on.png` has no matching "off" sprite. The off state of a settings toggle has to be made from the same sprite.
 - No material assets and no block colour textures are supplied; block, wall and door materials have to be created.
 - No audio is supplied, so the sound and music toggles can only store and show their state.
 - No font is supplied.
+- The home screen's level path has no sprites (level nodes, rails); the nodes are made from `SquareRoundedMask`.
+- No avatar is supplied for `profile_box_blue`, and no art for a fail popup.
 - Mesh names in `WallAndDoor.fbx` mix cases and carry export leftovers (`Corner_1`, `corner_3`, `corner_3.002`).
 - The models do not share an up axis: block parts have -Z up, and the door and the frame corner lie upside down. Each needs its own correction in code.
 - The ground tile is slightly smaller than a cell (1.953 against 2 units), which leaves gaps between tiles.
