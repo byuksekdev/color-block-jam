@@ -1,0 +1,56 @@
+{
+    "Version": 1,
+    "Width": 5,
+    "Height": 5,
+    "TimeLimitSeconds": 300,
+    "Blocks": [
+        {
+            "Color": 2,
+            "Cells": [
+                {
+                    "X": 3,
+                    "Y": 3
+                },
+                {
+                    "X": 3,
+                    "Y": 2
+                },
+                {
+                    "X": 3,
+                    "Y": 1
+                }
+            ]
+        },
+        {
+            "Color": 4,
+            "Cells": [
+                {
+                    "X": 1,
+                    "Y": 3
+                },
+                {
+                    "X": 1,
+                    "Y": 2
+                },
+                {
+                    "X": 1,
+                    "Y": 1
+                }
+            ]
+        }
+    ],
+    "Doors": [
+        {
+            "Color": 4,
+            "Side": 3,
+            "Start": 2,
+            "Length": 3
+        },
+        {
+            "Color": 2,
+            "Side": 2,
+            "Start": 0,
+            "Length": 3
+        }
+    ]
+}

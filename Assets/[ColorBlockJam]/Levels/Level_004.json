@@ -1,0 +1,89 @@
+{
+    "Version": 1,
+    "Width": 5,
+    "Height": 6,
+    "TimeLimitSeconds": 300,
+    "Blocks": [
+        {
+            "Color": 7,
+            "Cells": [
+                {
+                    "X": 0,
+                    "Y": 3
+                },
+                {
+                    "X": 1,
+                    "Y": 3
+                },
+                {
+                    "X": 0,
+                    "Y": 4
+                },
+                {
+                    "X": 1,
+                    "Y": 4
+                }
+            ]
+        },
+        {
+            "Color": 3,
+            "Cells": [
+                {
+                    "X": 3,
+                    "Y": 1
+                },
+                {
+                    "X": 4,
+                    "Y": 1
+                },
+                {
+                    "X": 3,
+                    "Y": 2
+                },
+                {
+                    "X": 4,
+                    "Y": 2
+                }
+            ]
+        },
+        {
+            "Color": 2,
+            "Cells": [
+                {
+                    "X": 2,
+                    "Y": 3
+                },
+                {
+                    "X": 2,
+                    "Y": 2
+                }
+            ]
+        }
+    ],
+    "Doors": [
+        {
+            "Color": 3,
+            "Side": 3,
+            "Start": 0,
+            "Length": 2
+        },
+        {
+            "Color": 2,
+            "Side": 0,
+            "Start": 4,
+            "Length": 2
+        },
+        {
+            "Color": 2,
+            "Side": 1,
+            "Start": 0,
+            "Length": 2
+        },
+        {
+            "Color": 7,
+            "Side": 2,
+            "Start": 3,
+            "Length": 2
+        }
+    ]
+}
