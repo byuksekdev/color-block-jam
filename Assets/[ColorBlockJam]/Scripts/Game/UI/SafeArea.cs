@@ -9,13 +9,6 @@ namespace ColorBlockJam.Game.UI
     [RequireComponent(typeof(RectTransform))]
     public sealed class SafeArea : MonoBehaviour
     {
-        /// <summary>An inset smaller than this share of the screen height is rounding, not a notch.</summary>
-        private const float SmallestInset = 0.03f;
-
-        /// <summary>Phones report more room than the notch and the home indicator take; the panel takes this share of the screen height back.</summary>
-        private const float TopReclaim = 0.025f;
-        private const float BottomReclaim = 0.02f;
-
         [SerializeField] private bool _fitsTop = true;
         [SerializeField] private bool _fitsBottom = true;
 
@@ -45,16 +38,6 @@ namespace ColorBlockJam.Game.UI
 
             float bottom = _fitsBottom ? _appliedArea.yMin / _appliedScreenHeight : 0f;
             float top = _fitsTop ? _appliedArea.yMax / _appliedScreenHeight : 1f;
-
-            if (bottom > SmallestInset)
-            {
-                bottom -= BottomReclaim;
-            }
-
-            if (top < 1f - SmallestInset)
-            {
-                top += TopReclaim;
-            }
 
             _rect.anchorMin = new Vector2(0f, bottom);
             _rect.anchorMax = new Vector2(1f, top);
