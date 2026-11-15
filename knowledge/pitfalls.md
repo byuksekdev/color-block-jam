@@ -59,6 +59,7 @@ Failure modes that fit this project's stack (DOTween, Lean Pool, uGUI, a timer, 
 
 - Canvas Scaler: Scale With Screen Size, reference 1080 x 1920. Check the match value at 16:9 and at 20:9 (1080 x 2400) in the Game view before calling a screen done.
 - Anchor to edges and corners, not to the centre with fixed offsets. Top and bottom bars respect `Screen.safeArea` on phones with a notch or a gesture bar.
+- The safe area is applied as the device reports it. A gap that looks too large is closed with padding inside the panel, never by moving the panel back out of the safe area: on Android the reported inset is the camera cutout itself.
 - The 3D board has to fit as well: frame it from the board size and the camera aspect, not from a fixed camera position.
 
 ## Unity project hygiene
