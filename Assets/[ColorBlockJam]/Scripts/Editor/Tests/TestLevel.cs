@@ -1,3 +1,4 @@
+using ColorBlockJam.Core.Boards;
 using ColorBlockJam.Core.Data;
 
 namespace ColorBlockJam.Tests
@@ -5,6 +6,9 @@ namespace ColorBlockJam.Tests
     internal static class TestLevel
     {
         public const int TimeLimitSeconds = 10;
+
+        /// <summary>A drag that stops exactly at the cell line and is taken by a door from half a cell away.</summary>
+        public static readonly DragRules ExactDrag = new DragRules(0f, 0.5f);
 
         public static LevelData Create(int width, int height)
         {

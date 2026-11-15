@@ -1,4 +1,5 @@
 using ColorBlockJam.Core.Boards;
+using ColorBlockJam.Core.Data;
 using ColorBlockJam.Core.Flow;
 using ColorBlockJam.Core.Sessions;
 using ColorBlockJam.Game.BoardViews;
@@ -81,9 +82,9 @@ namespace ColorBlockJam.Game
             _session = null;
         }
 
-        private void OnBlockExited(Block block, Door door)
+        private void OnBlockExited(Block block, Cell origin, Door door)
         {
-            _boardView.PlayExit(block, door);
+            _boardView.PlayExit(block, origin, door);
         }
     }
 }

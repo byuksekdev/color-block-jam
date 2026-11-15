@@ -1,4 +1,5 @@
 using System;
+using ColorBlockJam.Core.Boards;
 using ColorBlockJam.Core.Players;
 using ColorBlockJam.Core.Sessions;
 
@@ -12,12 +13,14 @@ namespace ColorBlockJam.Core.Flow
     {
         private readonly PlayerProfile _player;
         private readonly ILevelSource _levels;
+        private readonly DragRules _dragRules;
         private LevelSession _session;
 
-        public GameFlow(PlayerProfile player, ILevelSource levels)
+        public GameFlow(PlayerProfile player, ILevelSource levels, DragRules dragRules)
         {
             _player = player;
             _levels = levels;
+            _dragRules = dragRules;
         }
 
         /// <summary>A new attempt began. The session is new each time.</summary>
@@ -50,7 +53,7 @@ namespace ColorBlockJam.Core.Flow
 
             ReleaseSession();
             LevelIndex = levelIndex;
-            _session = new LevelSession(_levels.Load(levelIndex % _levels.Count));
+            _session = new LevelSession(_levels.Load(levelIndex % _levels.Count), _dragRules);
             _session.StateChanged += OnStateChanged;
             LevelStarted?.Invoke(_session);
         }

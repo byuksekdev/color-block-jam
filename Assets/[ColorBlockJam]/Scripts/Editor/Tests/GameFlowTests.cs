@@ -27,7 +27,7 @@ namespace ColorBlockJam.Tests
             _storage = new FakePlayerStorage();
             _levels = new FakeLevelSource(LevelCount);
             _player = new PlayerProfile(_storage);
-            _flow = new GameFlow(_player, _levels);
+            _flow = new GameFlow(_player, _levels, TestLevel.ExactDrag);
             _rewards = new List<int>();
             _session = null;
             _flow.LevelStarted += session => _session = session;
@@ -66,7 +66,7 @@ namespace ColorBlockJam.Tests
         [Test]
         public void StartLevel_EmptyLevelList_Throws()
         {
-            var flow = new GameFlow(_player, new FakeLevelSource(0));
+            var flow = new GameFlow(_player, new FakeLevelSource(0), TestLevel.ExactDrag);
 
             Assert.Throws<InvalidOperationException>(() => flow.StartLevel());
         }

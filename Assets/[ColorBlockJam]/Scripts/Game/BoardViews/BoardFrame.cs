@@ -8,8 +8,8 @@ using UnityEngine;
 namespace ColorBlockJam.Game.BoardViews
 {
     /// <summary>
-    /// The frame around the board: walls, corners and doors, taken from pools. A wall and a door
-    /// are one cell long at scale 1 and are stretched along the side they stand on.
+    /// The frame around the board: walls, corners and doors, taken from pools. A wall, a door and
+    /// the effect of a block leaving are one cell long at scale 1 and are stretched along their side.
     /// </summary>
     public sealed class BoardFrame : MonoBehaviour
     {
@@ -24,10 +24,12 @@ namespace ColorBlockJam.Game.BoardViews
         [SerializeField] private LeanGameObjectPool _wallPool;
         [SerializeField] private LeanGameObjectPool _cornerPool;
         [SerializeField] private LeanGameObjectPool _doorPool;
+        [SerializeField] private LeanGameObjectPool _exitEffectPool;
 
         private readonly List<GameObject> _walls = new List<GameObject>();
         private readonly List<GameObject> _corners = new List<GameObject>();
         private readonly List<DoorView> _doors = new List<DoorView>();
+        private readonly List<ExitEffect> _exitEffects = new List<ExitEffect>();
         private IReadOnlyBoard _board;
         private BoardSpace _space;
 
@@ -92,12 +94,21 @@ namespace ColorBlockJam.Game.BoardViews
                 _doorPool.Despawn(_doors[i].gameObject);
             }
 
+            for (int i = 0; i < _exitEffects.Count; i++)
+            {
+                _exitEffects[i].Finished -= TakeAway;
+                _exitEffects[i].Release();
+                _exitEffectPool.Despawn(_exitEffects[i].gameObject);
+            }
+
             _walls.Clear();
             _corners.Clear();
             _doors.Clear();
+            _exitEffects.Clear();
         }
 
-        public void Open(Door door)
+        /// <summary>Opens the door for a block that leaves from this cell, and throws out cubes of its colour where it passes.</summary>
+        public void LetOut(Block block, Cell origin, Door door)
         {
             for (int i = 0; i < _board.Doors.Count; i++)
             {
@@ -106,6 +117,17 @@ namespace ColorBlockJam.Game.BoardViews
                     _doors[i].Open();
                 }
             }
+
+            bool runsAlongX = door.Side.RunsAlongX();
+            int start = runsAlongX ? origin.X : origin.Y;
+            int cells = runsAlongX ? block.Width : block.Height;
+            GameObject clone = _exitEffectPool.Spawn(SidePosition(door.Side, start, cells), SideRotation(door.Side), transform);
+            var effect = clone.GetComponent<ExitEffect>();
+
+            _palette.TryGetMaterial(block.Color, out Material material);
+            effect.Finished += TakeAway;
+            effect.Play(cells, material);
+            _exitEffects.Add(effect);
         }
 
         private void FindDoors(BoardSide side, int length, Door[] doorAt)
@@ -144,6 +166,13 @@ namespace ColorBlockJam.Game.BoardViews
                     _doors[i] = view;
                 }
             }
+        }
+
+        private void TakeAway(ExitEffect effect)
+        {
+            effect.Finished -= TakeAway;
+            _exitEffects.Remove(effect);
+            _exitEffectPool.Despawn(effect.gameObject);
         }
 
         private void PlaceCorner(int quarterTurns)

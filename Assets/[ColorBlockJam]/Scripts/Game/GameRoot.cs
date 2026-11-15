@@ -14,6 +14,7 @@ namespace ColorBlockJam.Game
     public sealed class GameRoot : MonoBehaviour
     {
         [SerializeField] private LevelCatalog _catalog;
+        [SerializeField] private DragTuning _dragTuning;
         [SerializeField] private LevelRunner _levelRunner;
         [SerializeField] private GameScreens _screens;
 
@@ -28,7 +29,7 @@ namespace ColorBlockJam.Game
         private void Awake()
         {
             var player = new PlayerProfile(new PlayerPrefsStorage());
-            _flow = new GameFlow(player, _catalog);
+            _flow = new GameFlow(player, _catalog, _dragTuning.Rules);
             _flow.LevelLeft += LoadHome;
 
             _levelRunner.Bind(_flow);

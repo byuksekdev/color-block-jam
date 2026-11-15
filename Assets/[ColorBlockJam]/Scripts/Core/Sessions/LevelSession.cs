@@ -14,11 +14,12 @@ namespace ColorBlockJam.Core.Sessions
     {
         private readonly BoardState _board;
         private readonly LevelTimer _timer;
+        private readonly DragRules _dragRules;
         private BlockDrag _drag;
         private SessionState _stateBeforePause;
         private int _announcedSecondsLeft;
 
-        public LevelSession(LevelData level)
+        public LevelSession(LevelData level, DragRules dragRules)
         {
             List<LevelProblem> problems = LevelValidator.Validate(level);
             if (problems.Count > 0)
@@ -28,13 +29,15 @@ namespace ColorBlockJam.Core.Sessions
 
             _board = new BoardState(level);
             _timer = new LevelTimer(level.TimeLimitSeconds);
+            _dragRules = dragRules;
             _announcedSecondsLeft = _timer.SecondsLeft;
             State = SessionState.Ready;
         }
 
         public event Action<SessionState> StateChanged;
         public event Action<int> SecondsLeftChanged;
-        public event Action<Block, Door> BlockExited;
+        /// <summary>A block left the board: the block, the cell its origin stood on, and the door it left through.</summary>
+        public event Action<Block, Cell, Door> BlockExited;
 
         public IReadOnlyBoard Board => _board;
         public SessionState State { get; private set; }
@@ -71,7 +74,7 @@ namespace ColorBlockJam.Core.Sessions
                 return false;
             }
 
-            _drag = new BlockDrag(_board, blockId);
+            _drag = new BlockDrag(_board, blockId, _dragRules.BlockOverlap);
             SetState(SessionState.Playing);
             return true;
         }
@@ -88,20 +91,18 @@ namespace ColorBlockJam.Core.Sessions
                 return false;
             }
 
-            while (_drag.MoveTowards(target))
+            BoardPoint start = _drag.Position;
+            bool enteredCell;
+            do
             {
-                if (ExitRule.TryFindExit(_board, _drag.BlockId, out Door reachedDoor))
+                enteredCell = _drag.MoveTowards(target);
+                if (IsTakenByDoor(start, target, enteredCell, out Door door))
                 {
-                    ExitDraggedBlock(reachedDoor);
+                    ExitDraggedBlock(door);
                     return false;
                 }
             }
-
-            if (ExitRule.TryFindExit(_board, _drag.BlockId, out Door door) && _drag.IsPushedAgainst(door.Side, target))
-            {
-                ExitDraggedBlock(door);
-                return false;
-            }
+            while (enteredCell);
 
             position = _drag.Position;
             return true;
@@ -133,12 +134,34 @@ namespace ColorBlockJam.Core.Sessions
             }
         }
 
+        /// <summary>
+        /// A door takes the dragged block when the block may leave through it and is pressed towards it,
+        /// or has just come within the door's reach. A block that only rests near its door stays.
+        /// </summary>
+        private bool IsTakenByDoor(BoardPoint start, BoardPoint target, bool enteredCell, out Door door)
+        {
+            if (!ExitRule.TryFindExit(_board, _drag.BlockId, out door))
+            {
+                return false;
+            }
+
+            if (_drag.IsPushedAgainst(door.Side, target))
+            {
+                return true;
+            }
+
+            float distance = _drag.DistanceFrom(door.Side, _drag.Position);
+            bool cameCloser = enteredCell || distance < _drag.DistanceFrom(door.Side, start);
+            return cameCloser && distance <= _dragRules.DoorReach;
+        }
+
         private void ExitDraggedBlock(Door door)
         {
             Block block = _board.Blocks[_drag.BlockId];
+            Cell origin = _board.GetOrigin(block.Id);
             EndDrag();
             _board.RemoveBlock(block.Id);
-            BlockExited?.Invoke(block, door);
+            BlockExited?.Invoke(block, origin, door);
 
             if (_board.RemainingBlockCount == 0)
             {

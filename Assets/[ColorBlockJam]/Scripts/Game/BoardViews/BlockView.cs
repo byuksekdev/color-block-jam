@@ -13,11 +13,17 @@ namespace ColorBlockJam.Game.BoardViews
         [SerializeField] private MeshFilter _meshFilter;
         [SerializeField] private MeshRenderer _renderer;
 
+        [Tooltip("The white edge around the block. It takes the block's mesh and is shown while a finger holds the block.")]
+        [SerializeField] private MeshFilter _outline;
+
         [Tooltip("How far a block is lifted above the board while a finger holds it.")]
         [SerializeField] private float _heldLift = 0.35f;
 
         [Tooltip("Seconds a block takes to come to rest on its cell after the finger lets go.")]
         [SerializeField] private float _settleSeconds = 0.08f;
+
+        [Tooltip("Seconds a block takes to line up with its door before it slides out.")]
+        [SerializeField] private float _alignSeconds = 0.08f;
 
         [Tooltip("Seconds a block takes to slide out through a door.")]
         [SerializeField] private float _leaveSeconds = 0.3f;
@@ -34,8 +40,10 @@ namespace ColorBlockJam.Game.BoardViews
             _mesh = mesh;
             _restHeight = position.y;
             _meshFilter.sharedMesh = mesh;
+            _outline.sharedMesh = mesh;
             _renderer.sharedMaterial = material;
             transform.position = position;
+            ShowOutline(false);
         }
 
         /// <summary>Follows the finger: the block is held slightly above the board.</summary>
@@ -44,6 +52,7 @@ namespace ColorBlockJam.Game.BoardViews
             transform.DOKill();
             position.y = _restHeight + _heldLift;
             transform.position = position;
+            ShowOutline(true);
         }
 
         /// <summary>Comes to rest on a cell after the finger let go.</summary>
@@ -52,17 +61,22 @@ namespace ColorBlockJam.Game.BoardViews
             transform.DOKill();
             position.y = _restHeight;
             transform.DOMove(position, _settleSeconds).SetLink(gameObject);
+            ShowOutline(false);
         }
 
-        /// <summary>Slides off the board through a door and then reports that it has left.</summary>
-        public void Leave(Vector3 offset)
+        /// <summary>
+        /// Lines up on the doorstep, the place of the cell it leaves from, then slides off the board
+        /// through the door and reports that it has left.
+        /// </summary>
+        public void Leave(Vector3 doorstep, Vector3 offset)
         {
             transform.DOKill();
-            Vector3 start = transform.position;
-            start.y = _restHeight;
-            transform.position = start;
-            transform.DOMove(start + offset, _leaveSeconds)
-                .SetEase(Ease.InQuad)
+            ShowOutline(false);
+            doorstep.y = _restHeight;
+            DOTween.Sequence()
+                .Append(transform.DOMove(doorstep, _alignSeconds))
+                .Append(transform.DOMove(doorstep + offset, _leaveSeconds).SetEase(Ease.InQuad))
+                .SetTarget(transform)
                 .SetLink(gameObject)
                 .OnComplete(RaiseLeft);
         }
@@ -71,7 +85,9 @@ namespace ColorBlockJam.Game.BoardViews
         public void Release()
         {
             transform.DOKill();
+            ShowOutline(false);
             _meshFilter.sharedMesh = null;
+            _outline.sharedMesh = null;
             Destroy(_mesh);
             _mesh = null;
         }
@@ -79,6 +95,14 @@ namespace ColorBlockJam.Game.BoardViews
         private void OnDestroy()
         {
             Destroy(_mesh);
+        }
+
+        private void ShowOutline(bool isShown)
+        {
+            if (_outline.gameObject.activeSelf != isShown)
+            {
+                _outline.gameObject.SetActive(isShown);
+            }
         }
 
         private void RaiseLeft()

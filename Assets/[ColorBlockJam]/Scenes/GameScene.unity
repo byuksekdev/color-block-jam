@@ -184,6 +184,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _catalog: {fileID: 11400000, guid: 79da6a5f7f90344bf85a4e73fcfce220, type: 2}
+  _dragTuning: {fileID: 11400000, guid: 31e67731f8e884c8cbb0f971ad79a28f, type: 2}
   _levelRunner: {fileID: 89575056}
   _screens: {fileID: 331772217}
 --- !u!224 &115138298 stripped

@@ -77,13 +77,17 @@ namespace ColorBlockJam.Game.BoardViews
             return Space.ToWorld(origin) + Vector3.up * BlockRestHeight;
         }
 
-        /// <summary>Plays a block leaving through a door. The session has already removed the block.</summary>
-        public void PlayExit(Block block, Door door)
+        /// <summary>
+        /// Plays a block leaving through a door: the block first lines up on the cell it left from.
+        /// The session has already removed the block.
+        /// </summary>
+        public void PlayExit(Block block, Cell origin, Door door)
         {
             Cell step = door.Side.OutwardStep();
             float cells = (door.Side.RunsAlongX() ? block.Height : block.Width) + ExitExtraCells;
-            _blocks[block.Id].Leave(new Vector3(step.X, 0f, step.Y) * (cells * BoardSpace.CellSize));
-            _frame.Open(door);
+            Vector3 doorstep = BlockPosition(BoardPoint.FromCell(origin));
+            _blocks[block.Id].Leave(doorstep, new Vector3(step.X, 0f, step.Y) * (cells * BoardSpace.CellSize));
+            _frame.LetOut(block, origin, door);
         }
 
         private void TakeAway(BlockView view)
