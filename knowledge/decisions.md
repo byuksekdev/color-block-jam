@@ -36,9 +36,10 @@ Entry format:
 **Alternatives:** one ScriptableObject per level (Unity YAML, and the round trip is harder to test); `StreamingAssets` (needs a web request to read on Android).
 
 ## A level file holds logical data only
-**Decision:** a level file stores the board width and height, the timer in seconds, the blocks (colour and cells), the doors (colour, side, start, length) and a format version. Walls, corners, ground cells and world positions are not stored; the game builds them from the board size and the doors.
+**Decision:** a level file stores the board width and height, the timer in seconds, the blocks (colour, cells, the axis of an arrow block, an ice count), the doors (colour, side, start, length, an ice count) and a format version. Walls, corners, ground cells and world positions are not stored; the game builds them from the board size and the doors.
 **Why:** the supplied block and door models are modular per cell, so a block is a set of cells and a door is a run of cells. A file that stores no derived data cannot contradict itself, and a new block shape needs no new code and no new prefab.
 **Alternatives:** a shape id plus a rotation per block, which ties every level file to a shape table.
+The axis and the ice counts were added later with zero as "none", so a file written before them reads the same and the format version did not change. The editor compares the open level with its file after reading and writing the file again, so such a file does not show as changed.
 
 ## The level editor is a Unity Editor window
 **Decision:** the editor is an `EditorWindow` built with UI Toolkit. It lists the levels, edits board size, timer, blocks and doors on a visual grid, checks the level structure while the designer edits, saves, and starts Play Mode on the edited level.
@@ -63,8 +64,8 @@ Entry format:
 **Alternatives:** transform positions and physics overlap as the source of truth, which brings float tolerances into the rules.
 
 ## When a block leaves the board
-**Decision:** a block leaves through a door of its colour when it touches that door's side of the board, all of its cells lie inside the door's span, and no other block stands between any of its cells and the door. The door takes the block while it is being dragged, once it has come within a set reach of the door's side or is pressed against it; a block that only rests at its door stays. The logic removes the block first and reports the cell it left from; the view then lines the block up on that cell, slides it out through the door and throws out cubes of its colour.
-**Why:** this matches the reference game, where a door may be wider than the block and a block is caught slightly before it reaches the door. Changing the state before animating keeps the rule independent of the animation, and a removed block cannot be grabbed again while it leaves. Lining up first keeps a block that was caught off its cell from sliding through the wall beside the door.
+**Decision:** a block leaves through a door of its colour when it touches that door's side of the board, all of its cells lie inside the door's span, and no other block stands between any of its cells and the door. The door takes the block while it is being dragged, once it has come within a set reach of the door's side or is pressed against it; a block that only rests at its door stays. The logic removes the block first and reports the cell it left from; the view then lines the block up on that cell and moves it into the door by its own length, cutting off what passes the door line, while cubes of its colour fly out on the other side. Ice on the block or on the door keeps the block in, and an arrow block leaves only through a door that lies along its arrow.
+**Why:** this matches the reference game, where a door may be wider than the block and a block is caught slightly before it reaches the door. Changing the state before animating keeps the rule independent of the animation, and a removed block cannot be grabbed again while it leaves. Lining up first keeps a block that was caught off its cell from sliding through the wall beside the door. The cut is made on the block's own mesh: every vertex past the door line is flattened onto it each frame of the exit. Each block has a mesh of its own, so no other block is touched, and the supplied materials need no clipping shader.
 
 ## Only the session changes the board
 **Decision:** the session owns the board state and hands it out as a read-only interface. A view asks the session to begin, move and end a drag, and learns about results from the session's events: state changed, block left, shown second changed.
@@ -78,6 +79,23 @@ Entry format:
 **Decision:** the board view shows everything of a level (ground, frame, doors, blocks) when a session starts, from the session's read-only board. Each kind of part is a prefab in `Prefabs/Board/` (`Block`, `Door`, `Wall`, `WallCorner`, `Ground`, `ExitEffect`), and `Board` is the prefab that holds them together with one Lean Pool pool per part. A restart gives every part back to its pool and takes it out again. No level has scene content or a prefab of its own.
 **Why:** a level file is enough to show a level, so a level made in the editor plays without any other step, and a board of any size uses the same code path. What a part looks like, where its mesh sits and how it moves is set on its prefab, so a change to the art or the feel needs no code. Restart, which a player presses often, creates no objects.
 **Alternatives:** building the parts in code with `new GameObject`, which was the first version: it put mesh offsets and animation times into the scripts and made every visual change a code change. The pools are components in the scene and are passed to the views, so the pool plugin's static entry point is not used.
+
+## Ice is a count in the level; what is left is worked out
+**Decision:** a block or a door under ice stores one number: how many blocks have to leave the level before it melts. The board keeps no counter for it: what is left is that number minus the blocks that have left. A block under ice cannot be dragged and cannot leave; a door under ice lets nothing out. The two are independent, and each block and door has its own number.
+**Why:** one number per block and door is all a designer sets, and a value that is worked out cannot drift from the board, so a restart needs nothing reset. The views read the counts again after each exit, from the event they already listen to.
+
+## An arrow block is an axis on the block
+**Decision:** a block has an axis: any, horizontal or vertical. The drag ignores the finger across the axis, and the exit rule lets the block out only through a door on a side its axis points to. The view takes the supplied arrow mesh that matches the block's length.
+**Why:** it is one field and two checks in rules that already exist, so every block shape can be an arrow block and no second kind of block is needed.
+
+## The solver lets out whichever block it can, then starts again
+**Decision:** `LevelSolver` answers solvable, unsolvable or unknown. It first rejects what can be seen without a search: a block that reaches no door of its colour even alone on the board, and ice that can never melt because too many blocks wait for each other. Then it searches the positions the blocks can be moved into, nearest first, until some block can be walked to its door; that block leaves and the search starts again from there. The search has a limit of positions; past it the answer is unknown.
+**Why:** a block that leaves never makes the rest harder: it frees cells, melts ice, and every move made to let it out can be taken back. So the order of exits never has to be tried, only whether a next exit exists, which keeps the search small on real levels. The solver uses the same board and exit rule as the game, so it cannot disagree with it.
+**Alternatives:** a search over every order of moves and exits, which grows too fast to run on save. The editor warns only on "unsolvable"; "unknown" saves without a warning, because a wrong warning teaches the designer to ignore it.
+
+## A tool brings its own options
+**Decision:** a board tool of the editor can hand over an element with its own choices (the ice count of the Ice tool, the direction of the Arrow tool), which the tool panel shows while that tool is chosen.
+**Why:** a new tool stays one class and one entry in the tool list, and the panel shows only what the chosen tool uses.
 
 ## Drag feel is tuned in one asset
 **Decision:** how far the dragged block may sink into another block, and from how far a door takes a block, are two values in `Data/DragTuning.asset`. The game scene's root turns them into the logic's `DragRules` and hands them to every session. The logic clamps both: the overlap stays below half a cell and the reach within half a cell.
@@ -167,4 +185,5 @@ Entry format:
 ## Open
 
 - **Third-party plugins**: DOTween (UI and board animation) and Lean Pool (the board's pools) are in `Assets/Plugins/`. Record where they came from for the README. The exit effect adds no art: it draws Unity's built-in cube with the block's material.
+- **Large open levels are not checked**: the solver stops after a set number of positions and answers "unknown", and the editor then saves without a warning.
 - **Settings have no effect yet**: the vibration, sound and music switches are saved and shown, but nothing in the game listens to them. There are no audio assets in the supplied art.

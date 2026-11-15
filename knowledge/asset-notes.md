@@ -9,13 +9,13 @@ What the supplied art contains and what is missing. The brief welcomes feedback 
 | `BlockParts.fbx` | `ModularBlock_Center`, `ModularBlock_Edge`, `ModularBlock_InnerCorner`, `ModularBlock_OuterCorner` | A block is assembled per cell from these parts, so any shape made of cells can be built. |
 | `WallAndDoor.fbx` | `Wall`, `Corner_1`, `corner_3`, `corner_3.002`, `corner_4`, `corner_5`, `Door_1x1`, `Door_Arrow` | The board frame. A door is a run of `Door_1x1` pieces. |
 | `GroundGrid.fbx` | `Grid` | One ground cell. |
-| `Arrows.fbx` | `Arrow_1`, `Arrow_2`, `Arrow_3` | Arrow block (optional scope). |
+| `Arrows.fbx` | `Arrow_1`, `Arrow_2`, `Arrow_3` | The arrow on an arrow block: one mesh for a block of one, two and three cells along its arrow. |
 
 The FBX files carry four material slots: `ModularBlock_Base`, `Base_Side`, `Gate_Orange`, `Arrow_Gate_Orange`.
 
 ## Textures and UI
 
-- `VisualAssets/Textures/icetexture.jpg`: ice (optional scope).
+- `VisualAssets/Textures/icetexture.jpg`: ice. `VisualAssets/Materials/Ice.mat` is made from it and covers a block or a door while it is frozen.
 - `VisualAssets/UI/`: sprites for the home screen, the tab bar, the gameplay HUD, popups, the settings rows, coins and booster icons.
 
 ## UI sprites in use

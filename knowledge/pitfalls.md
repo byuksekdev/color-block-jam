@@ -18,6 +18,8 @@ Failure modes that fit this project's stack (DOTween, Lean Pool, uGUI, a timer, 
 - Reset everything in `OnEnable` or the spawn hook: colour, scale, rotation, parent, running tweens, event subscriptions. `Awake` and `Start` run only the first time.
 - Despawn while a tween runs on the object: kill the tween first.
 - The exit effect gives itself back: its particle system does not loop and its stop action is Callback, so `ExitEffect` hears when the last cube has gone. With another stop action the effect never returns to its pool. Its scaling mode is Shape, so stretching it to the block's width does not stretch the cubes.
+- A leaving block changes the vertices of its own mesh to be cut at the door. A block mesh is therefore never shared between two blocks, and it is destroyed, not reused, when the view is released.
+- A mark on a pooled block or door (ice count, arrow, ice material) is switched off in `Show` and switched on by a call after it. A mark that is only switched on stays on for the next block that takes the object.
 - The exit animation starts from the cell the session reports, not from where the finger left the block: the session removes a block up to half a cell before it is lined up with its door.
 
 ## Tweens
