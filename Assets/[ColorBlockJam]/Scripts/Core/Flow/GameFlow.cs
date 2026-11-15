@@ -15,6 +15,7 @@ namespace ColorBlockJam.Core.Flow
         private readonly ILevelSource _levels;
         private readonly DragRules _dragRules;
         private LevelSession _session;
+        private bool _isPreview;
 
         public GameFlow(PlayerProfile player, ILevelSource levels, DragRules dragRules)
         {
@@ -40,22 +41,18 @@ namespace ColorBlockJam.Core.Flow
         /// <summary>Starts the level the player has reached.</summary>
         public void StartLevel()
         {
-            StartLevel(_player.LevelIndex);
+            _isPreview = false;
+            Start(_player.LevelIndex);
         }
 
-        /// <summary>Starts any level. After the last level file the levels repeat from the first.</summary>
-        public void StartLevel(int levelIndex)
+        /// <summary>
+        /// Plays any level without touching what the player has: a win earns nothing and does not move
+        /// the player on. Restart and the next level stay in the preview. The level editor plays a level this way.
+        /// </summary>
+        public void PreviewLevel(int levelIndex)
         {
-            if (_levels.Count == 0)
-            {
-                throw new InvalidOperationException("There is no level to play: the level list is empty.");
-            }
-
-            ReleaseSession();
-            LevelIndex = levelIndex;
-            _session = new LevelSession(_levels.Load(levelIndex % _levels.Count), _dragRules);
-            _session.StateChanged += OnStateChanged;
-            LevelStarted?.Invoke(_session);
+            _isPreview = true;
+            Start(levelIndex);
         }
 
         /// <summary>Starts the level being played again. Does nothing on the home screen.</summary>
@@ -63,7 +60,7 @@ namespace ColorBlockJam.Core.Flow
         {
             if (_session != null)
             {
-                StartLevel(LevelIndex);
+                Start(LevelIndex);
             }
         }
 
@@ -72,7 +69,7 @@ namespace ColorBlockJam.Core.Flow
         {
             if (_session != null && _session.State == SessionState.Won)
             {
-                StartLevel(LevelIndex + 1);
+                Start(LevelIndex + 1);
             }
         }
 
@@ -85,6 +82,21 @@ namespace ColorBlockJam.Core.Flow
 
             ReleaseSession();
             LevelLeft?.Invoke();
+        }
+
+        /// <summary>After the last level file the levels repeat from the first.</summary>
+        private void Start(int levelIndex)
+        {
+            if (_levels.Count == 0)
+            {
+                throw new InvalidOperationException("There is no level to play: the level list is empty.");
+            }
+
+            ReleaseSession();
+            LevelIndex = levelIndex;
+            _session = new LevelSession(_levels.Load(levelIndex % _levels.Count), _dragRules);
+            _session.StateChanged += OnStateChanged;
+            LevelStarted?.Invoke(_session);
         }
 
         private void ReleaseSession()
@@ -106,7 +118,7 @@ namespace ColorBlockJam.Core.Flow
             }
 
             int reward = 0;
-            if (LevelIndex == _player.LevelIndex)
+            if (!_isPreview && LevelIndex == _player.LevelIndex)
             {
                 _player.CompleteLevel();
                 reward = PlayerProfile.LevelReward;

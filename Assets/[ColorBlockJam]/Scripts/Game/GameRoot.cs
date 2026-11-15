@@ -20,10 +20,10 @@ namespace ColorBlockJam.Game
 
         private GameFlow _flow;
 
-        /// <summary>Starts this level instead of the one the player has reached. The level editor plays a level this way.</summary>
-        public void PlayLevel(int levelIndex)
+        /// <summary>Plays this level instead of the one the player has reached, without changing what the player has. The level editor plays a level this way.</summary>
+        public void PreviewLevel(int levelIndex)
         {
-            _flow.StartLevel(levelIndex);
+            _flow.PreviewLevel(levelIndex);
         }
 
         private void Awake()

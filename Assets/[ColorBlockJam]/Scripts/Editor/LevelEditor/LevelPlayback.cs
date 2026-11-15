@@ -69,7 +69,7 @@ namespace ColorBlockJam.LevelEditor
                 return;
             }
 
-            game.PlayLevel(levelIndex);
+            game.PreviewLevel(levelIndex);
         }
 
         private static SceneAsset FindGameScene()

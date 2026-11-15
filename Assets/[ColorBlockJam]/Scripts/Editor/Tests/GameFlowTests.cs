@@ -72,9 +72,9 @@ namespace ColorBlockJam.Tests
         }
 
         [Test]
-        public void StartLevel_PastTheLastLevelFile_RepeatsFromTheFirstAndKeepsCounting()
+        public void PreviewLevel_PastTheLastLevelFile_RepeatsFromTheFirstAndKeepsCounting()
         {
-            _flow.StartLevel(LevelCount + 1);
+            _flow.PreviewLevel(LevelCount + 1);
 
             Assert.AreEqual(LevelCount + 1, _flow.LevelIndex);
             CollectionAssert.AreEqual(new[] { 1 }, _levels.LoadedIndices);
@@ -241,6 +241,49 @@ namespace ColorBlockJam.Tests
 
             Assert.AreEqual(400, _player.Coins);
             CollectionAssert.IsEmpty(_rewards);
+        }
+
+        [Test]
+        public void PreviewLevel_WinOnTheLevelThePlayerHasReached_ChangesNothingThePlayerHas()
+        {
+            int coins = _player.Coins;
+            int saves = _storage.SaveCount;
+
+            _flow.PreviewLevel(_player.LevelIndex);
+            Win(_session);
+
+            Assert.AreEqual(coins, _player.Coins);
+            Assert.AreEqual(0, _player.LevelIndex);
+            Assert.AreEqual(saves, _storage.SaveCount);
+            CollectionAssert.AreEqual(new[] { 0 }, _rewards);
+        }
+
+        [Test]
+        public void PreviewLevel_RestartAndNextLevel_StayInThePreview()
+        {
+            int coins = _player.Coins;
+
+            _flow.PreviewLevel(0);
+            _flow.RestartLevel();
+            Win(_session);
+            _flow.StartNextLevel();
+            Win(_session);
+
+            Assert.AreEqual(1, _flow.LevelIndex);
+            Assert.AreEqual(coins, _player.Coins);
+            Assert.AreEqual(0, _player.LevelIndex);
+        }
+
+        [Test]
+        public void StartLevel_AfterAPreview_GrantsTheRewardAgain()
+        {
+            _flow.PreviewLevel(3);
+
+            _flow.StartLevel();
+            Win(_session);
+
+            CollectionAssert.AreEqual(new[] { PlayerProfile.LevelReward }, _rewards);
+            Assert.AreEqual(1, _player.LevelIndex);
         }
     }
 }
