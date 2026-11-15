@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using ColorBlockJam.Core.Data;
 using ColorBlockJam.Core.Editing;
 using ColorBlockJam.Core.Validation;
-using ColorBlockJam.Game.Persistence;
 using ColorBlockJam.Game.Visuals;
 using UnityEditor;
 using UnityEngine;
@@ -13,7 +12,8 @@ namespace ColorBlockJam.LevelEditor
 {
     /// <summary>
     /// The level editor. It holds the open level and the designer's choices, and connects the panels,
-    /// the canvas and the tools. Every change to the level goes through Edit, so it can be undone.
+    /// the canvas and the tools. Every change to the level goes through Edit, so it can be undone;
+    /// opening, saving and deleting levels is the work of the level switcher.
     /// </summary>
     internal sealed class LevelEditorWindow : EditorWindow, IEditingContext
     {
@@ -25,19 +25,15 @@ namespace ColorBlockJam.LevelEditor
         private const int RightMouseButton = 1;
         private const int BlockToolIndex = 0;
         private const int MaxBoardSize = 10;
-        private const int NewBoardSize = 5;
-        private const int NewTimeLimitSeconds = 300;
-        private const int SaveChoice = 0;
-        private const int CancelChoice = 1;
 
-        [SerializeField] private LevelData _level = new LevelData();
-        [SerializeField] private TextAsset _file;
+        [SerializeField] private OpenLevel _open = new OpenLevel();
         [SerializeField] private int _toolIndex;
         [SerializeField] private BlockColor _color = BlockColor.Red;
         [SerializeField] private int _shapeIndex;
         [SerializeField] private List<Cell> _shape = new List<Cell>();
 
         private LevelLibrary _library;
+        private LevelSwitcher _levels;
         private BlockPalette _palette;
         private IBoardTool[] _tools;
         private IBoardTool _eraseTool;
@@ -49,24 +45,23 @@ namespace ColorBlockJam.LevelEditor
         private EditorHeader _header;
         private Label _emptyState;
 
-        public LevelData Level => _level;
+        public LevelData Level => _open.Data;
         public BlockColor Color => _color;
         public IReadOnlyList<Cell> Shape => _shape;
         public BoardCanvas Canvas => _canvas;
 
-        private bool HasLevel => _file != null;
         private IBoardTool ActiveTool => _tools[_toolIndex];
 
         public void Edit(string undoName, Action<LevelData> change)
         {
             Undo.RecordObject(this, undoName);
-            change(_level);
+            change(_open.Data);
             RefreshLevel();
         }
 
         public override void SaveChanges()
         {
-            SaveLevel();
+            _levels.Save();
             base.SaveChanges();
         }
 
@@ -91,6 +86,8 @@ namespace ColorBlockJam.LevelEditor
         private void CreateGUI()
         {
             _library = new LevelLibrary();
+            _levels = new LevelSwitcher(_library, _open, this);
+            _levels.Changed += RefreshAll;
             _palette = EditorAssets.FindPalette();
             _eraseTool = new EraseTool(this);
             _tools = new IBoardTool[] { new BlockTool(this), new DoorTool(this), new MoveTool(this), _eraseTool };
@@ -114,21 +111,17 @@ namespace ColorBlockJam.LevelEditor
             root.Add(BuildSidebar());
             root.Add(BuildMain());
 
-            if (!HasLevel && _library.Count > 0)
-            {
-                LoadLevel(_library.GetFile(0));
-            }
-
+            _levels.OpenFirst();
             RefreshAll();
         }
 
         private VisualElement BuildSidebar()
         {
             _levelList = new LevelListPanel();
-            _levelList.LevelChosen += ChooseLevel;
-            _levelList.LevelMoved += MoveLevel;
-            _levelList.NewRequested += NewLevel;
-            _levelList.DeleteRequested += DeleteLevel;
+            _levelList.LevelChosen += _levels.Choose;
+            _levelList.LevelMoved += _levels.Move;
+            _levelList.NewRequested += _levels.New;
+            _levelList.DeleteRequested += _levels.Delete;
 
             _settings = new BoardSettingsPanel(LevelValidator.MinBoardSize, MaxBoardSize);
             _settings.SizeChosen += (width, height) => Edit("Resize Board", level => LevelEditing.Resize(level, width, height));
@@ -155,8 +148,8 @@ namespace ColorBlockJam.LevelEditor
         private VisualElement BuildMain()
         {
             _header = new EditorHeader();
-            _header.SaveRequested += SaveLevel;
-            _header.PlayRequested += PlayLevel;
+            _header.SaveRequested += _levels.Save;
+            _header.PlayRequested += _levels.Play;
 
             _canvas = new BoardCanvas();
             _canvas.PointerPressed += (hit, button) => (button == RightMouseButton ? _eraseTool : ActiveTool).PointerDown(hit);
@@ -173,108 +166,6 @@ namespace ColorBlockJam.LevelEditor
             main.Add(_canvas);
             main.Add(_emptyState);
             return main;
-        }
-
-        private void ChooseLevel(int index)
-        {
-            if (index < 0 || index >= _library.Count || _library.GetFile(index) == _file)
-            {
-                return;
-            }
-
-            if (TryLeaveLevel())
-            {
-                LoadLevel(_library.GetFile(index));
-            }
-
-            RefreshAll();
-        }
-
-        private void NewLevel()
-        {
-            if (!TryLeaveLevel())
-            {
-                return;
-            }
-
-            var level = new LevelData { Width = NewBoardSize, Height = NewBoardSize, TimeLimitSeconds = NewTimeLimitSeconds };
-            LoadLevel(_library.Create(level));
-            RefreshAll();
-        }
-
-        private void DeleteLevel()
-        {
-            string question = "Delete " + _file.name + "? This cannot be undone.";
-            if (!EditorUtility.DisplayDialog("Delete level", question, "Delete", "Cancel"))
-            {
-                return;
-            }
-
-            int index = _library.IndexOf(_file);
-            _library.Delete(_file);
-            _file = null;
-
-            if (_library.Count > 0)
-            {
-                LoadLevel(_library.GetFile(Mathf.Min(index, _library.Count - 1)));
-            }
-
-            RefreshAll();
-        }
-
-        private void MoveLevel(int from, int to)
-        {
-            _library.Move(from, to);
-            RefreshAll();
-        }
-
-        private void SaveLevel()
-        {
-            _library.Save(_file, _level);
-            RefreshLevel();
-        }
-
-        private void PlayLevel()
-        {
-            if (hasUnsavedChanges)
-            {
-                SaveLevel();
-            }
-
-            LevelPlayback.Play(_library.IndexOf(_file));
-        }
-
-        private void LoadLevel(TextAsset file)
-        {
-            try
-            {
-                _level = _library.Load(file);
-            }
-            catch (FormatException exception)
-            {
-                EditorUtility.DisplayDialog("Level cannot be opened", file.name + ": " + exception.Message, "OK");
-                return;
-            }
-
-            _file = file;
-            Undo.ClearUndo(this);
-        }
-
-        private bool TryLeaveLevel()
-        {
-            if (!HasLevel || !hasUnsavedChanges)
-            {
-                return true;
-            }
-
-            string question = "Save the changes to " + _file.name + "?";
-            int choice = EditorUtility.DisplayDialogComplex("Unsaved changes", question, "Save", "Cancel", "Discard");
-            if (choice == SaveChoice)
-            {
-                SaveLevel();
-            }
-
-            return choice != CancelChoice;
         }
 
         private void ChooseTool(int index)
@@ -346,7 +237,7 @@ namespace ColorBlockJam.LevelEditor
                 names.Add(_library.GetFile(i).name);
             }
 
-            _levelList.Refresh(names, HasLevel ? _library.IndexOf(_file) : LevelEditing.NotFound);
+            _levelList.Refresh(names, _open.Exists ? _library.IndexOf(_open.File) : LevelEditing.NotFound);
             RefreshChoices();
             RefreshLevel();
         }
@@ -358,25 +249,25 @@ namespace ColorBlockJam.LevelEditor
 
         private void RefreshLevel()
         {
-            hasUnsavedChanges = HasLevel && LevelSerializer.ToJson(_level) != _file.text;
+            hasUnsavedChanges = _open.HasUnsavedChanges;
 
-            SetShown(_emptyState, !HasLevel);
-            SetShown(_canvas, HasLevel);
-            SetShown(_settings, HasLevel);
-            SetShown(_toolPanel, HasLevel);
-            SetShown(_problems, HasLevel);
+            SetShown(_emptyState, !_open.Exists);
+            SetShown(_canvas, _open.Exists);
+            SetShown(_settings, _open.Exists);
+            SetShown(_toolPanel, _open.Exists);
+            SetShown(_problems, _open.Exists);
 
-            if (!HasLevel)
+            if (!_open.Exists)
             {
                 _header.Refresh(WindowTitle, false, false);
                 return;
             }
 
-            List<LevelProblem> problems = LevelValidator.Validate(_level);
-            string title = _file.name + (hasUnsavedChanges ? UnsavedMark : string.Empty);
+            List<LevelProblem> problems = LevelValidator.Validate(_open.Data);
+            string title = _open.File.name + (hasUnsavedChanges ? UnsavedMark : string.Empty);
             _header.Refresh(title, hasUnsavedChanges, problems.Count == 0);
-            _canvas.Show(_level, _palette);
-            _settings.Refresh(_level);
+            _canvas.Show(_open.Data, _palette);
+            _settings.Refresh(_open.Data);
             _problems.Refresh(problems);
         }
 
