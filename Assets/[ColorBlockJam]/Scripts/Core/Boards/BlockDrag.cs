@@ -6,7 +6,7 @@ namespace ColorBlockJam.Core.Boards
     /// <summary>
     /// Moves one block smoothly across the board. The block stops at the board edge and may sink a
     /// little into other blocks, so that it does not have to be lined up exactly to pass between them.
-    /// The board is updated each time the block enters a new cell.
+    /// An arrow block moves only along its arrow. The board is updated each time the block enters a new cell.
     /// </summary>
     public sealed class BlockDrag
     {
@@ -38,8 +38,8 @@ namespace ColorBlockJam.Core.Boards
         /// </summary>
         public bool MoveTowards(BoardPoint target)
         {
-            float targetX = Math.Clamp(target.X, 0f, _board.Width - _block.Width);
-            float targetY = Math.Clamp(target.Y, 0f, _board.Height - _block.Height);
+            float targetX = _block.Axis.AllowsHorizontal() ? Math.Clamp(target.X, 0f, _board.Width - _block.Width) : Position.X;
+            float targetY = _block.Axis.AllowsVertical() ? Math.Clamp(target.Y, 0f, _board.Height - _block.Height) : Position.Y;
             Cell origin = _board.GetOrigin(BlockId);
 
             while (true)

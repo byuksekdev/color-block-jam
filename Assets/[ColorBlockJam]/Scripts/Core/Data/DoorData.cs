@@ -10,5 +10,8 @@ namespace ColorBlockJam.Core.Data
         public BoardSide Side;
         public int Start;
         public int Length;
+
+        /// <summary>How many blocks have to leave the level before this door lets a block out. 0 for a door without ice.</summary>
+        public int IceCount;
     }
 }

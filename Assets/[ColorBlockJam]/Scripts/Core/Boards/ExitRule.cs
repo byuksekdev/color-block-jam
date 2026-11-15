@@ -6,6 +6,7 @@ namespace ColorBlockJam.Core.Boards
     /// <summary>
     /// A block can leave through a door of its colour when it touches the door's side of the board,
     /// every cell of it lies inside the door's span, and no other block stands between it and the door.
+    /// Ice on the block or on the door keeps it in, and an arrow block leaves only along its arrow.
     /// </summary>
     public static class ExitRule
     {
@@ -29,6 +30,11 @@ namespace ColorBlockJam.Core.Boards
 
         private static bool CanLeaveThrough(IReadOnlyBoard board, Block block, Door door)
         {
+            if (board.IceLeft(block) > 0 || board.IceLeft(door) > 0 || !block.Axis.AllowsLeavingThrough(door.Side))
+            {
+                return false;
+            }
+
             Cell origin = board.GetOrigin(block.Id);
             Cell step = door.Side.OutwardStep();
             bool touchesSide = false;

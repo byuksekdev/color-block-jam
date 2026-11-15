@@ -128,5 +128,46 @@ namespace ColorBlockJam.Tests
             Assert.IsFalse(board.TryGetBlockAt(new Cell(3, 0), out _));
             Assert.AreEqual(1, board.RemainingBlockCount);
         }
+
+        [Test]
+        public void IceLeft_EachBlockThatLeaves_TakesOneOffEveryCount()
+        {
+            LevelData level = TestLevel.Create(3, 3)
+                .WithBlock(BlockColor.Red, new Cell(0, 0))
+                .WithBlock(BlockColor.Blue, new Cell(1, 0))
+                .WithBlock(BlockColor.Green, new Cell(2, 0))
+                .WithDoor(BlockColor.Red, BoardSide.Bottom, 0, 1);
+            level.Blocks[0].IceCount = 2;
+            level.Doors[0].IceCount = 1;
+            var board = new BoardState(level);
+
+            board.RemoveBlock(1);
+            int blockIceAfterOne = board.IceLeft(board.Blocks[0]);
+            int doorIceAfterOne = board.IceLeft(board.Doors[0]);
+            board.RemoveBlock(2);
+
+            Assert.AreEqual(1, blockIceAfterOne);
+            Assert.AreEqual(0, doorIceAfterOne);
+            Assert.AreEqual(0, board.IceLeft(board.Blocks[0]));
+            Assert.AreEqual(0, board.IceLeft(board.Doors[0]));
+        }
+
+        [Test]
+        public void SetOrigins_PutsTheBlocksOnTheBoardWhereTold()
+        {
+            LevelData level = TestLevel.Create(3, 3)
+                .WithBlock(BlockColor.Red, new Cell(0, 0))
+                .WithBlock(BlockColor.Blue, new Cell(1, 0));
+            var board = new BoardState(level);
+            board.RemoveBlock(1);
+
+            board.SetOrigins(new[] { new Cell(2, 2), new Cell(1, 0) });
+
+            Assert.AreEqual(new Cell(2, 2), board.GetOrigin(0));
+            Assert.IsTrue(board.TryGetBlockAt(new Cell(2, 2), out int occupant));
+            Assert.AreEqual(0, occupant);
+            Assert.IsFalse(board.TryGetBlockAt(new Cell(0, 0), out _));
+            Assert.IsFalse(board.TryGetBlockAt(new Cell(1, 0), out _));
+        }
     }
 }

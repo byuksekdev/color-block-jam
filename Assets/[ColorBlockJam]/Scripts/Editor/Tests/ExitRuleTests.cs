@@ -109,5 +109,48 @@ namespace ColorBlockJam.Tests
 
             Assert.IsFalse(CanExit(level));
         }
+
+        [Test]
+        public void TryFindExit_DoorUnderIce_IsRefusedUntilEnoughBlocksHaveLeft()
+        {
+            LevelData level = TestLevel.Create(3, 3)
+                .WithBlock(BlockColor.Red, new Cell(0, 2))
+                .WithBlock(BlockColor.Blue, new Cell(2, 0))
+                .WithDoor(BlockColor.Red, BoardSide.Top, 0, 1)
+                .WithDoor(BlockColor.Blue, BoardSide.Bottom, 2, 1);
+            level.Doors[0].IceCount = 1;
+            var board = new BoardState(level);
+
+            bool leavesUnderIce = ExitRule.TryFindExit(board, 0, out _);
+            board.RemoveBlock(1);
+            bool leavesAfterTheMelt = ExitRule.TryFindExit(board, 0, out _);
+
+            Assert.IsFalse(leavesUnderIce);
+            Assert.IsTrue(leavesAfterTheMelt);
+        }
+
+        [Test]
+        public void TryFindExit_BlockUnderIce_IsRefused()
+        {
+            LevelData level = TestLevel.Create(3, 3)
+                .WithBlock(BlockColor.Red, new Cell(0, 2))
+                .WithDoor(BlockColor.Red, BoardSide.Top, 0, 1);
+            level.Blocks[0].IceCount = 1;
+
+            Assert.IsFalse(ExitRule.TryFindExit(new BoardState(level), 0, out _));
+        }
+
+        [TestCase(BlockAxis.Any, true)]
+        [TestCase(BlockAxis.Vertical, true)]
+        [TestCase(BlockAxis.Horizontal, false)]
+        public void TryFindExit_ArrowBlockAtATopDoor_LeavesOnlyAlongItsArrow(BlockAxis axis, bool expected)
+        {
+            LevelData level = TestLevel.Create(3, 3)
+                .WithBlock(BlockColor.Red, new Cell(0, 2))
+                .WithDoor(BlockColor.Red, BoardSide.Top, 0, 1);
+            level.Blocks[0].Axis = axis;
+
+            Assert.AreEqual(expected, ExitRule.TryFindExit(new BoardState(level), 0, out _));
+        }
     }
 }

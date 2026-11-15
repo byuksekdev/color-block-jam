@@ -6,11 +6,13 @@ namespace ColorBlockJam.Core.Boards
 {
     public sealed class Block
     {
-        public Block(int id, BlockColor color, IReadOnlyList<Cell> shape)
+        public Block(int id, BlockColor color, IReadOnlyList<Cell> shape, BlockAxis axis, int iceCount)
         {
             Id = id;
             Color = color;
             Shape = shape;
+            Axis = axis;
+            IceCount = iceCount;
 
             for (int i = 0; i < shape.Count; i++)
             {
@@ -27,5 +29,9 @@ namespace ColorBlockJam.Core.Boards
 
         public int Width { get; }
         public int Height { get; }
+        public BlockAxis Axis { get; }
+
+        /// <summary>How many blocks had to leave before this one could move, when the level began. The board tells how many are still needed.</summary>
+        public int IceCount { get; }
     }
 }

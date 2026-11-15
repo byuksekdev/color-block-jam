@@ -212,5 +212,20 @@ namespace ColorBlockJam.Tests
 
             Assert.AreEqual(expected, drag.IsPushedAgainst(side, new BoardPoint(targetX, targetY)));
         }
+
+        [TestCase(BlockAxis.Horizontal, 2f, 0f)]
+        [TestCase(BlockAxis.Vertical, 0f, 2f)]
+        [TestCase(BlockAxis.Any, 2f, 2f)]
+        public void MoveTowards_ArrowBlock_MovesOnlyAlongItsArrow(BlockAxis axis, float expectedX, float expectedY)
+        {
+            LevelData level = TestLevel.Create(5, 5).WithBlock(BlockColor.Blue, new Cell(0, 0));
+            level.Blocks[0].Axis = axis;
+            var drag = new BlockDrag(new BoardState(level), DraggedBlock, NoOverlap);
+
+            MoveUntilItStops(drag, new BoardPoint(2f, 2f));
+
+            Assert.AreEqual(expectedX, drag.Position.X);
+            Assert.AreEqual(expectedY, drag.Position.Y);
+        }
     }
 }

@@ -310,5 +310,22 @@ namespace ColorBlockJam.Tests
             Assert.AreEqual(new Cell(1, 1), restart.Board.GetOrigin(RedBlock));
             Assert.AreEqual(new Cell(0, 0), restart.Board.GetOrigin(BlueBlock));
         }
+
+        [Test]
+        public void TryBeginDrag_BlockUnderIce_IsRefusedUntilAnotherBlockLeaves()
+        {
+            LevelData level = TwoBlockLevel();
+            level.Blocks[BlueBlock].IceCount = 1;
+            var session = new LevelSession(level, TestLevel.ExactDrag);
+
+            bool beganUnderIce = session.TryBeginDrag(BlueBlock);
+            session.TryBeginDrag(RedBlock);
+            session.TryMoveDrag(RedDoor, out _);
+            bool beganAfterTheMelt = session.TryBeginDrag(BlueBlock);
+
+            Assert.IsFalse(beganUnderIce);
+            Assert.AreEqual(SessionState.Playing, session.State);
+            Assert.IsTrue(beganAfterTheMelt);
+        }
     }
 }

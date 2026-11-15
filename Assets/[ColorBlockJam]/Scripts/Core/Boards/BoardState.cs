@@ -36,7 +36,7 @@ namespace ColorBlockJam.Core.Boards
                     shape[j] = data.Cells[j] - origin;
                 }
 
-                _blocks[i] = new Block(i, data.Color, shape);
+                _blocks[i] = new Block(i, data.Color, shape, data.Axis, data.IceCount);
                 _origins[i] = origin;
                 _isOnBoard[i] = true;
                 SetOccupant(i, origin, i);
@@ -46,7 +46,7 @@ namespace ColorBlockJam.Core.Boards
             for (int i = 0; i < _doors.Length; i++)
             {
                 DoorData data = level.Doors[i];
-                _doors[i] = new Door(data.Color, data.Side, data.Start, data.Length);
+                _doors[i] = new Door(data.Color, data.Side, data.Start, data.Length, data.IceCount);
             }
 
             RemainingBlockCount = _blocks.Length;
@@ -57,6 +57,9 @@ namespace ColorBlockJam.Core.Boards
         public IReadOnlyList<Block> Blocks => _blocks;
         public IReadOnlyList<Door> Doors => _doors;
         public int RemainingBlockCount { get; private set; }
+
+        /// <summary>Ice melts by this number: every block that leaves takes one off each count.</summary>
+        private int ExitedBlockCount => _blocks.Length - RemainingBlockCount;
 
         public bool Contains(Cell cell)
         {
@@ -77,6 +80,16 @@ namespace ColorBlockJam.Core.Boards
         {
             blockId = Contains(cell) ? _occupants[IndexOf(cell)] : NoBlock;
             return blockId != NoBlock;
+        }
+
+        public int IceLeft(Block block)
+        {
+            return Math.Max(0, block.IceCount - ExitedBlockCount);
+        }
+
+        public int IceLeft(Door door)
+        {
+            return Math.Max(0, door.IceCount - ExitedBlockCount);
         }
 
         /// <summary>True when the block fits at this origin: inside the board and on no cell of another block.</summary>
@@ -116,6 +129,30 @@ namespace ColorBlockJam.Core.Boards
             SetOccupant(blockId, _origins[blockId], NoBlock);
             _origins[blockId] = origin;
             SetOccupant(blockId, origin, blockId);
+        }
+
+        /// <summary>
+        /// Puts every block that is still on the board at the origin given for it, without checking the way there.
+        /// The solver uses it to return to a position it has seen before.
+        /// </summary>
+        public void SetOrigins(IReadOnlyList<Cell> origins)
+        {
+            for (int i = 0; i < _blocks.Length; i++)
+            {
+                if (_isOnBoard[i])
+                {
+                    SetOccupant(i, _origins[i], NoBlock);
+                }
+            }
+
+            for (int i = 0; i < _blocks.Length; i++)
+            {
+                if (_isOnBoard[i])
+                {
+                    _origins[i] = origins[i];
+                    SetOccupant(i, origins[i], i);
+                }
+            }
         }
 
         public void RemoveBlock(int blockId)

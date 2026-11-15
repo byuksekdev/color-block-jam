@@ -9,6 +9,7 @@ namespace ColorBlockJam.Core.Editing
     public static class LevelEditing
     {
         public const int NotFound = -1;
+        public const int MaxIceCount = 99;
 
         public static int SideLength(LevelData level, BoardSide side)
         {
@@ -80,6 +81,23 @@ namespace ColorBlockJam.Core.Editing
             }
 
             return true;
+        }
+
+        /// <summary>Freezes a block until this many other blocks have left. 0 takes the ice off.</summary>
+        public static void SetBlockIce(LevelData level, int blockIndex, int count)
+        {
+            level.Blocks[blockIndex].IceCount = Math.Clamp(count, 0, MaxIceCount);
+        }
+
+        /// <summary>Freezes a door until this many blocks have left. 0 takes the ice off.</summary>
+        public static void SetDoorIce(LevelData level, int doorIndex, int count)
+        {
+            level.Doors[doorIndex].IceCount = Math.Clamp(count, 0, MaxIceCount);
+        }
+
+        public static void SetBlockAxis(LevelData level, int blockIndex, BlockAxis axis)
+        {
+            level.Blocks[blockIndex].Axis = axis;
         }
 
         public static int FindDoorAt(LevelData level, BoardSide side, int position)

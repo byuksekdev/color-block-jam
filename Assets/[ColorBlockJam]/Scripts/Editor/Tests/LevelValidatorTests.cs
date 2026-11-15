@@ -172,5 +172,21 @@ namespace ColorBlockJam.Tests
 
             CollectionAssert.IsEmpty(ProblemKinds(level));
         }
+
+        [Test]
+        public void Validate_IceCountBelowZero_IsReportedForBlockAndDoor()
+        {
+            LevelData level = TestLevel.Create(3, 3)
+                .WithBlock(BlockColor.Red, new Cell(0, 0))
+                .WithDoor(BlockColor.Red, BoardSide.Top, 0, 1);
+            level.Blocks[0].IceCount = -1;
+            level.Doors[0].IceCount = -1;
+
+            List<LevelProblem> problems = LevelValidator.Validate(level);
+
+            Assert.AreEqual(2, problems.Count);
+            Assert.AreEqual(LevelProblemKind.IceCountNegative, problems[0].Kind);
+            Assert.AreEqual(LevelProblemKind.IceCountNegative, problems[1].Kind);
+        }
     }
 }

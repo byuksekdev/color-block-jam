@@ -179,5 +179,42 @@ namespace ColorBlockJam.Tests
 
             CollectionAssert.IsEmpty(LevelValidator.Validate(level));
         }
+
+        [TestCase(3, 3)]
+        [TestCase(-2, 0)]
+        [TestCase(500, LevelEditing.MaxIceCount)]
+        public void SetBlockIce_AnyCount_IsKeptBetweenZeroAndTheMost(int count, int expected)
+        {
+            LevelData level = TestLevel.Create(3, 3).WithBlock(BlockColor.Red, new Cell(0, 0));
+
+            LevelEditing.SetBlockIce(level, 0, count);
+
+            Assert.AreEqual(expected, level.Blocks[0].IceCount);
+        }
+
+        [TestCase(3, 3)]
+        [TestCase(-2, 0)]
+        [TestCase(500, LevelEditing.MaxIceCount)]
+        public void SetDoorIce_AnyCount_IsKeptBetweenZeroAndTheMost(int count, int expected)
+        {
+            LevelData level = TestLevel.Create(3, 3).WithDoor(BlockColor.Red, BoardSide.Top, 0, 1);
+
+            LevelEditing.SetDoorIce(level, 0, count);
+
+            Assert.AreEqual(expected, level.Doors[0].IceCount);
+        }
+
+        [Test]
+        public void SetBlockAxis_ChangesOnlyThatBlock()
+        {
+            LevelData level = TestLevel.Create(3, 3)
+                .WithBlock(BlockColor.Red, new Cell(0, 0))
+                .WithBlock(BlockColor.Blue, new Cell(1, 0));
+
+            LevelEditing.SetBlockAxis(level, 1, BlockAxis.Vertical);
+
+            Assert.AreEqual(BlockAxis.Any, level.Blocks[0].Axis);
+            Assert.AreEqual(BlockAxis.Vertical, level.Blocks[1].Axis);
+        }
     }
 }

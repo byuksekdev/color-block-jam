@@ -36,7 +36,10 @@ namespace ColorBlockJam.Core.Sessions
 
         public event Action<SessionState> StateChanged;
         public event Action<int> SecondsLeftChanged;
-        /// <summary>A block left the board: the block, the cell its origin stood on, and the door it left through.</summary>
+        /// <summary>
+        /// A block left the board: the block, the cell its origin stood on, and the door it left through.
+        /// Every ice count on the board is one lower from now on.
+        /// </summary>
         public event Action<Block, Cell, Door> BlockExited;
 
         public IReadOnlyBoard Board => _board;
@@ -65,11 +68,11 @@ namespace ColorBlockJam.Core.Sessions
             }
         }
 
-        /// <summary>Starts dragging a block. The first drag of the session starts the timer.</summary>
+        /// <summary>Starts dragging a block. The first drag of the session starts the timer. A block under ice cannot be dragged.</summary>
         public bool TryBeginDrag(int blockId)
         {
             bool canPlay = State == SessionState.Ready || State == SessionState.Playing;
-            if (!canPlay || _drag != null || !_board.IsOnBoard(blockId))
+            if (!canPlay || _drag != null || !_board.IsOnBoard(blockId) || _board.IceLeft(_board.Blocks[blockId]) > 0)
             {
                 return false;
             }

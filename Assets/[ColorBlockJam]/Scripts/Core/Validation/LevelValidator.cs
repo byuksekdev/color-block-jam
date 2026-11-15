@@ -5,7 +5,7 @@ using ColorBlockJam.Core.Data;
 
 namespace ColorBlockJam.Core.Validation
 {
-    /// <summary>Checks that a level is well formed. It does not check that the level can be solved.</summary>
+    /// <summary>Checks that a level is well formed. Whether it can be solved is the question the level solver answers.</summary>
     public static class LevelValidator
     {
         public const int MinBoardSize = 1;
@@ -74,6 +74,11 @@ namespace ColorBlockJam.Core.Validation
                     continue;
                 }
 
+                if (block.IceCount < 0)
+                {
+                    problems.Add(new LevelProblem(LevelProblemKind.IceCountNegative, name + " has an ice count below zero."));
+                }
+
                 CheckBlockCells(level, block, name, takenCells, problems);
             }
         }
@@ -122,6 +127,11 @@ namespace ColorBlockJam.Core.Validation
                 if (door.Color == BlockColor.None)
                 {
                     problems.Add(new LevelProblem(LevelProblemKind.DoorHasNoColor, name + " has no colour."));
+                }
+
+                if (door.IceCount < 0)
+                {
+                    problems.Add(new LevelProblem(LevelProblemKind.IceCountNegative, name + " has an ice count below zero."));
                 }
 
                 int sideLength = door.Side.RunsAlongX() ? level.Width : level.Height;
