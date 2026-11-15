@@ -46,7 +46,7 @@ Entry format:
 **Alternatives:** an editor scene inside the game. Files written on a device do not reach the project, and it needs a second set of runtime UI.
 
 ## The editor window is a view; editing rules are logic
-**Decision:** what the editor may do to a level (place and move a block, place a door, resize the board) lives in `Scripts/Core/Editing/` and is tested there. The window only shows the level and forwards the designer's input. Each board tool is one class behind a small interface, and every change goes through one method that records an undo step.
+**Decision:** what the editor may do to a level (place and move a block, place a door, resize the board) lives in `Scripts/Core/Editing/` and is tested there. The window only shows the level and forwards the designer's input. Each board tool is one class behind a small interface, and every change goes through one method that records an undo step. Opening, creating, deleting, saving and playing a level is a class of its own beside the window, the level switcher, which asks before anything is lost.
 **Why:** the editor follows the same separation as the game, so an editing rule cannot differ between two tools, and a new tool is one new class.
 
 ## Play starts from the level editor
@@ -58,13 +58,13 @@ Entry format:
 **Why:** the designer sees in the editor the colours the player sees in the game, and a colour is changed in one place.
 
 ## Rules run on grid cells; the view moves smoothly
-**Decision:** the logic owns every block position as grid cells. During a drag the view moves the block continuously and asks the logic how far it may go; collision is arithmetic on cell occupancy. On release the block snaps to the nearest cell. There is no physics and there are no colliders.
-**Why:** the rules are deterministic and testable without a scene, and no game state lives in transforms.
+**Decision:** the logic owns every block position as grid cells. During a drag the view moves the block continuously and asks the logic how far it may go; collision is arithmetic on cell occupancy. On release the block snaps to the nearest cell. There is no physics and there are no colliders. The dragged block may sink a set fraction of a cell into another block: a cell it overlaps by less than that does not count as occupied by it. The board edge stays hard.
+**Why:** the rules are deterministic and testable without a scene, and no game state lives in transforms. The overlap is what makes a one-cell gap usable with a finger: without it the block passes only when it is lined up exactly, and a block that is boxed in does not move at all, which reads as a frozen touch.
 **Alternatives:** transform positions and physics overlap as the source of truth, which brings float tolerances into the rules.
 
 ## When a block leaves the board
-**Decision:** a block leaves through a door of its colour when it touches that door's side of the board, all of its cells lie inside the door's span, and no other block stands between any of its cells and the door. The logic removes the block first; the exit animation follows.
-**Why:** this matches the reference game, where a door may be wider than the block. Changing the state before animating keeps the rule independent of the animation.
+**Decision:** a block leaves through a door of its colour when it touches that door's side of the board, all of its cells lie inside the door's span, and no other block stands between any of its cells and the door. The door takes the block while it is being dragged, once it has come within a set reach of the door's side or is pressed against it; a block that only rests at its door stays. The logic removes the block first and reports the cell it left from; the view then lines the block up on that cell, slides it out through the door and throws out cubes of its colour.
+**Why:** this matches the reference game, where a door may be wider than the block and a block is caught slightly before it reaches the door. Changing the state before animating keeps the rule independent of the animation, and a removed block cannot be grabbed again while it leaves. Lining up first keeps a block that was caught off its cell from sliding through the wall beside the door.
 
 ## Only the session changes the board
 **Decision:** the session owns the board state and hands it out as a read-only interface. A view asks the session to begin, move and end a drag, and learns about results from the session's events: state changed, block left, shown second changed.
@@ -75,9 +75,18 @@ Entry format:
 **Why:** the brief requires that no data stays from the previous attempt. Nothing is reset field by field, so nothing can be forgotten.
 
 ## The board is built from the session, out of pooled prefabs
-**Decision:** the board view shows everything of a level (ground, frame, doors, blocks) when a session starts, from the session's read-only board. Each kind of part is a prefab in `Prefabs/Board/` (`Block`, `Door`, `Wall`, `WallCorner`, `Ground`), and `Board` is the prefab that holds them together with one Lean Pool pool per part. A restart gives every part back to its pool and takes it out again. No level has scene content or a prefab of its own.
+**Decision:** the board view shows everything of a level (ground, frame, doors, blocks) when a session starts, from the session's read-only board. Each kind of part is a prefab in `Prefabs/Board/` (`Block`, `Door`, `Wall`, `WallCorner`, `Ground`, `ExitEffect`), and `Board` is the prefab that holds them together with one Lean Pool pool per part. A restart gives every part back to its pool and takes it out again. No level has scene content or a prefab of its own.
 **Why:** a level file is enough to show a level, so a level made in the editor plays without any other step, and a board of any size uses the same code path. What a part looks like, where its mesh sits and how it moves is set on its prefab, so a change to the art or the feel needs no code. Restart, which a player presses often, creates no objects.
 **Alternatives:** building the parts in code with `new GameObject`, which was the first version: it put mesh offsets and animation times into the scripts and made every visual change a code change. The pools are components in the scene and are passed to the views, so the pool plugin's static entry point is not used.
+
+## Drag feel is tuned in one asset
+**Decision:** how far the dragged block may sink into another block, and from how far a door takes a block, are two values in `Data/DragTuning.asset`. The game scene's root turns them into the logic's `DragRules` and hands them to every session. The logic clamps both: the overlap stays below half a cell and the reach within half a cell.
+**Why:** these values are found by playing, not by reasoning, so they have to be changeable without code. They are rules, not view settings, so they are passed into the logic instead of being applied by the input, and the tests can run the same rules with exact values.
+
+## The outline of a held block is a second mesh
+**Decision:** the `Block` prefab has a child that takes the same mesh as the block and draws it with `Shaders/BlockOutline.shader`: the mesh is widened along its normals and only its back faces are drawn. The child is active only while a finger holds the block. Colour and width are set on the material.
+**Why:** it follows any block shape without extra art or a render feature, and it costs one draw call for the one block that is held.
+**Alternatives:** a full-screen outline pass, which costs every frame for one block, or outline meshes built per shape in code.
 
 ## A block is one mesh made of quarter parts
 **Decision:** each cell of a block is four quarters. A quarter gets the supplied part that fits its neighbours (flat centre, straight edge, outer corner, inner corner), and the parts of a block are combined into one mesh when the board is built.
@@ -157,6 +166,5 @@ Entry format:
 
 ## Open
 
-- **Unused template packages**: whether to remove `com.unity.collab-proxy`, `com.unity.visualscripting` and `com.unity.ide.vscode` from `Packages/manifest.json`.
-- **Third-party plugins**: DOTween (UI and board animation) and Lean Pool (the board's pools) are in `Assets/Plugins/`. Record where they came from for the README.
+- **Third-party plugins**: DOTween (UI and board animation) and Lean Pool (the board's pools) are in `Assets/Plugins/`. Record where they came from for the README. The exit effect adds no art: it draws Unity's built-in cube with the block's material.
 - **Settings have no effect yet**: the vibration, sound and music switches are saved and shown, but nothing in the game listens to them. There are no audio assets in the supplied art.

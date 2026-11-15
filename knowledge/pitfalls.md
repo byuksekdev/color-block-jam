@@ -17,6 +17,8 @@ Failure modes that fit this project's stack (DOTween, Lean Pool, uGUI, a timer, 
 - A view or a screen that a designer can tune or reuse is a prefab in `Prefabs/`, and a value that sets how it looks or moves is a serialized field on that prefab. Do not build such an object in code.
 - Reset everything in `OnEnable` or the spawn hook: colour, scale, rotation, parent, running tweens, event subscriptions. `Awake` and `Start` run only the first time.
 - Despawn while a tween runs on the object: kill the tween first.
+- The exit effect gives itself back: its particle system does not loop and its stop action is Callback, so `ExitEffect` hears when the last cube has gone. With another stop action the effect never returns to its pool. Its scaling mode is Shape, so stretching it to the block's width does not stretch the cubes.
+- The exit animation starts from the cell the session reports, not from where the finger left the block: the session removes a block up to half a cell before it is lined up with its door.
 
 ## Tweens
 

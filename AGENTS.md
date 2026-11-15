@@ -12,7 +12,7 @@ infer from the code, and hard constraints. How to edit this setup: .claude/rules
 A vertical slice of the puzzle game Color Block Jam, built as a take-home case with a 7-day limit. A reviewer reads the code, uses the level editor and plays an Android build. Art is not evaluated.
 
 - Unity `2022.3.62f2`, URP, uGUI + TextMesh Pro. Target: Android, portrait only, reference resolution 1080 x 1920; the layout must also hold on a 20:9 device.
-- `Assets/[ColorBlockJam]/` is the only folder for our work: `Scripts/`, `Data/`, `Levels/`, `Prefabs/`, `Scenes/` (`HomeScene.unity` is the first build scene, `GameScene.unity` the second), `VisualAssets/` (supplied art: do not add, buy or import other art).
+- `Assets/[ColorBlockJam]/` is the only folder for our work: `Scripts/`, `Data/`, `Levels/`, `Prefabs/`, `Shaders/`, `Scenes/` (`HomeScene.unity` is the first build scene, `GameScene.unity` the second), `VisualAssets/` (supplied art: do not add, buy or import other art).
 - `Scripts/Core/` is data and logic and has no `using UnityEngine` or `using UnityEditor`. `Scripts/Game/` is views, UI, input, level serialization and storage. `Scripts/Editor/` is the level editor and the EditMode tests. Our code has no assembly definitions.
 - `Assets/Plugins/` (DOTween, Lean Pool, simulator devices) and `Assets/TextMesh Pro/` are third-party: never edit them.
 - `knowledge/` holds what the code cannot say: the case requirements, the reference game, the decision log, known pitfalls. Index: `knowledge/README.md`.
