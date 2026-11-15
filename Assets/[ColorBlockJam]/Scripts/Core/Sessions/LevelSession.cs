@@ -99,7 +99,7 @@ namespace ColorBlockJam.Core.Sessions
             do
             {
                 enteredCell = _drag.MoveTowards(target);
-                if (IsTakenByDoor(start, target, enteredCell, out Door door))
+                if (TryFindTakingDoor(start, target, enteredCell, out Door door))
                 {
                     ExitDraggedBlock(door);
                     return false;
@@ -140,19 +140,39 @@ namespace ColorBlockJam.Core.Sessions
         /// <summary>
         /// A door takes the dragged block when the block may leave through it and is pressed towards it,
         /// or has just come within the door's reach. A block that only rests near its door stays.
+        /// Every door is asked, and one the block is pressed towards goes before one it only came near,
+        /// so the order of the doors in the level makes no difference.
         /// </summary>
-        private bool IsTakenByDoor(BoardPoint start, BoardPoint target, bool enteredCell, out Door door)
+        private bool TryFindTakingDoor(BoardPoint start, BoardPoint target, bool enteredCell, out Door takingDoor)
         {
-            if (!ExitRule.TryFindExit(_board, _drag.BlockId, out door))
+            IReadOnlyList<Door> doors = _board.Doors;
+            takingDoor = null;
+
+            for (int i = 0; i < doors.Count; i++)
             {
-                return false;
+                Door door = doors[i];
+                if (!ExitRule.CanLeaveThrough(_board, _drag.BlockId, door))
+                {
+                    continue;
+                }
+
+                if (_drag.IsPushedAgainst(door.Side, target))
+                {
+                    takingDoor = door;
+                    return true;
+                }
+
+                if (takingDoor == null && HasComeWithinReach(door, start, enteredCell))
+                {
+                    takingDoor = door;
+                }
             }
 
-            if (_drag.IsPushedAgainst(door.Side, target))
-            {
-                return true;
-            }
+            return takingDoor != null;
+        }
 
+        private bool HasComeWithinReach(Door door, BoardPoint start, bool enteredCell)
+        {
             float distance = _drag.DistanceFrom(door.Side, _drag.Position);
             bool cameCloser = enteredCell || distance < _drag.DistanceFrom(door.Side, start);
             return cameCloser && distance <= _dragRules.DoorReach;

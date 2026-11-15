@@ -327,5 +327,30 @@ namespace ColorBlockJam.Tests
             Assert.AreEqual(SessionState.Playing, session.State);
             Assert.IsTrue(beganAfterTheMelt);
         }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TryMoveDrag_BlockInACornerBetweenTwoOfItsDoors_LeavesThroughTheOneItIsPushedAt(bool leftDoorFirst)
+        {
+            LevelData level = TestLevel.Create(3, 3).WithBlock(BlockColor.Red, new Cell(0, 2));
+            if (leftDoorFirst)
+            {
+                level.WithDoor(BlockColor.Red, BoardSide.Left, 2, 1).WithDoor(BlockColor.Red, BoardSide.Top, 0, 1);
+            }
+            else
+            {
+                level.WithDoor(BlockColor.Red, BoardSide.Top, 0, 1).WithDoor(BlockColor.Red, BoardSide.Left, 2, 1);
+            }
+
+            var session = new LevelSession(level, TestLevel.ExactDrag);
+            Door usedDoor = null;
+            session.BlockExited += (block, origin, door) => usedDoor = door;
+            session.TryBeginDrag(RedBlock);
+
+            session.TryMoveDrag(new BoardPoint(0f, 2.5f), out _);
+
+            Assert.AreEqual(SessionState.Won, session.State);
+            Assert.AreEqual(BoardSide.Top, usedDoor.Side);
+        }
     }
 }

@@ -12,12 +12,11 @@ namespace ColorBlockJam.Core.Boards
     {
         public static bool TryFindExit(IReadOnlyBoard board, int blockId, out Door door)
         {
-            Block block = board.Blocks[blockId];
             IReadOnlyList<Door> doors = board.Doors;
 
             for (int i = 0; i < doors.Count; i++)
             {
-                if (doors[i].Color == block.Color && CanLeaveThrough(board, block, doors[i]))
+                if (CanLeaveThrough(board, blockId, doors[i]))
                 {
                     door = doors[i];
                     return true;
@@ -28,9 +27,10 @@ namespace ColorBlockJam.Core.Boards
             return false;
         }
 
-        private static bool CanLeaveThrough(IReadOnlyBoard board, Block block, Door door)
+        public static bool CanLeaveThrough(IReadOnlyBoard board, int blockId, Door door)
         {
-            if (board.IceLeft(block) > 0 || board.IceLeft(door) > 0 || !block.Axis.AllowsLeavingThrough(door.Side))
+            Block block = board.Blocks[blockId];
+            if (door.Color != block.Color || board.IceLeft(block) > 0 || board.IceLeft(door) > 0 || !block.Axis.AllowsLeavingThrough(door.Side))
             {
                 return false;
             }
