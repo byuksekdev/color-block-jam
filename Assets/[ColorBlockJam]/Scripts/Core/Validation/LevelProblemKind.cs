@@ -15,5 +15,9 @@ namespace ColorBlockJam.Core.Validation
         DoorOutsideSide,
         DoorsOverlap,
         IceCountNegative,
+        BlockColorUnknown,
+        BlockAxisUnknown,
+        DoorColorUnknown,
+        DoorSideUnknown,
     }
 }

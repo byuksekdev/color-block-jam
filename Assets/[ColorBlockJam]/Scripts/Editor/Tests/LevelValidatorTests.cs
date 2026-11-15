@@ -188,5 +188,23 @@ namespace ColorBlockJam.Tests
             Assert.AreEqual(LevelProblemKind.IceCountNegative, problems[0].Kind);
             Assert.AreEqual(LevelProblemKind.IceCountNegative, problems[1].Kind);
         }
+
+        [Test]
+        public void Validate_ValuesThatAreNoColourDirectionOrSide_AreReportedEach()
+        {
+            const int unknown = 999;
+            LevelData level = TestLevel.Create(3, 3)
+                .WithBlock((BlockColor)unknown, new Cell(0, 0))
+                .WithDoor((BlockColor)unknown, (BoardSide)unknown, 0, 1);
+            level.Blocks[0].Axis = (BlockAxis)unknown;
+
+            List<LevelProblem> problems = LevelValidator.Validate(level);
+
+            Assert.AreEqual(4, problems.Count);
+            Assert.AreEqual(LevelProblemKind.BlockColorUnknown, problems[0].Kind);
+            Assert.AreEqual(LevelProblemKind.BlockAxisUnknown, problems[1].Kind);
+            Assert.AreEqual(LevelProblemKind.DoorColorUnknown, problems[2].Kind);
+            Assert.AreEqual(LevelProblemKind.DoorSideUnknown, problems[3].Kind);
+        }
     }
 }

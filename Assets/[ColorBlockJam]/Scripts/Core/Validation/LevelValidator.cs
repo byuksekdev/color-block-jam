@@ -67,6 +67,15 @@ namespace ColorBlockJam.Core.Validation
                 {
                     problems.Add(new LevelProblem(LevelProblemKind.BlockHasNoColor, name + " has no colour."));
                 }
+                else if (!Enum.IsDefined(typeof(BlockColor), block.Color))
+                {
+                    problems.Add(new LevelProblem(LevelProblemKind.BlockColorUnknown, name + " has a colour that this build does not know."));
+                }
+
+                if (!Enum.IsDefined(typeof(BlockAxis), block.Axis))
+                {
+                    problems.Add(new LevelProblem(LevelProblemKind.BlockAxisUnknown, name + " has a direction that this build does not know."));
+                }
 
                 if (block.Cells.Count == 0)
                 {
@@ -128,6 +137,16 @@ namespace ColorBlockJam.Core.Validation
                 {
                     problems.Add(new LevelProblem(LevelProblemKind.DoorHasNoColor, name + " has no colour."));
                 }
+                else if (!Enum.IsDefined(typeof(BlockColor), door.Color))
+                {
+                    problems.Add(new LevelProblem(LevelProblemKind.DoorColorUnknown, name + " has a colour that this build does not know."));
+                }
+
+                if (!Enum.IsDefined(typeof(BoardSide), door.Side))
+                {
+                    problems.Add(new LevelProblem(LevelProblemKind.DoorSideUnknown, name + " stands on a side of the board that this build does not know."));
+                    continue;
+                }
 
                 if (door.IceCount < 0)
                 {
@@ -176,7 +195,8 @@ namespace ColorBlockJam.Core.Validation
             for (int i = 0; i < level.Blocks.Count; i++)
             {
                 BlockColor color = level.Blocks[i].Color;
-                if (color == BlockColor.None || doorColors.Contains(color) || !reportedColors.Add(color))
+                bool hasNoKnownColor = color == BlockColor.None || !Enum.IsDefined(typeof(BlockColor), color);
+                if (hasNoKnownColor || doorColors.Contains(color) || !reportedColors.Add(color))
                 {
                     continue;
                 }
