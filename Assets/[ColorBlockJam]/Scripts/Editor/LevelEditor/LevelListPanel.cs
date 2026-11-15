@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 namespace ColorBlockJam.LevelEditor
 {
-    /// <summary>The levels in play order. Dragging a row changes the order.</summary>
+    /// <summary>The levels in play order, with the drafts after them. Dragging a row changes the order.</summary>
     internal sealed class LevelListPanel : VisualElement
     {
         private const float RowHeight = 24f;

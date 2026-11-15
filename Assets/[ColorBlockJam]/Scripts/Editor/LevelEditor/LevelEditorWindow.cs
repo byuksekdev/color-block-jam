@@ -20,6 +20,7 @@ namespace ColorBlockJam.LevelEditor
         private const string MenuPath = "Tools/Color Block Jam/Level Editor";
         private const string WindowTitle = "Level Editor";
         private const string UnsavedMark = " *";
+        private const string DraftMark = "  (draft, not in the game)";
         private const float MinWindowWidth = 760f;
         private const float MinWindowHeight = 560f;
         private const int RightMouseButton = 1;
@@ -239,7 +240,8 @@ namespace ColorBlockJam.LevelEditor
             var names = new List<string>(_library.Count);
             for (int i = 0; i < _library.Count; i++)
             {
-                names.Add(_library.GetFile(i).name);
+                string name = _library.GetFile(i).name;
+                names.Add(_library.IsPlayable(i) ? name : name + DraftMark);
             }
 
             _levelList.Refresh(names, _open.Exists ? _library.IndexOf(_open.File) : LevelEditing.NotFound);
