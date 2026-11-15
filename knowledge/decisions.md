@@ -74,9 +74,10 @@ Entry format:
 **Decision:** starting or restarting a level builds a new session object from the level data, and the board view is rebuilt from that session.
 **Why:** the brief requires that no data stays from the previous attempt. Nothing is reset field by field, so nothing can be forgotten.
 
-## The board is built from the session, with a kit of parts
-**Decision:** the board view builds everything a level shows (ground, frame, doors, blocks) when a session starts, from the session's read-only board and one `BoardKit` asset that names the supplied meshes and the materials. No level has scene content or a prefab of its own.
-**Why:** a level file is enough to show a level, so a level made in the editor plays without any other step, and a board of any size uses the same code path. Swapping art is a change to the kit asset.
+## The board is built from the session, out of pooled prefabs
+**Decision:** the board view shows everything of a level (ground, frame, doors, blocks) when a session starts, from the session's read-only board. Each kind of part is a prefab in `Prefabs/Board/` (`Block`, `Door`, `Wall`, `WallCorner`, `Ground`), and `Board` is the prefab that holds them together with one Lean Pool pool per part. A restart gives every part back to its pool and takes it out again. No level has scene content or a prefab of its own.
+**Why:** a level file is enough to show a level, so a level made in the editor plays without any other step, and a board of any size uses the same code path. What a part looks like, where its mesh sits and how it moves is set on its prefab, so a change to the art or the feel needs no code. Restart, which a player presses often, creates no objects.
+**Alternatives:** building the parts in code with `new GameObject`, which was the first version: it put mesh offsets and animation times into the scripts and made every visual change a code change. The pools are components in the scene and are passed to the views, so the pool plugin's static entry point is not used.
 
 ## A block is one mesh made of quarter parts
 **Decision:** each cell of a block is four quarters. A quarter gets the supplied part that fits its neighbours (flat centre, straight edge, outer corner, inner corner), and the parts of a block are combined into one mesh when the board is built.
@@ -87,9 +88,14 @@ Entry format:
 **Decision:** the camera keeps a fixed tilt and moves back until the board with its frame fits a rectangle of the screen that leaves room for the HUD above and the boosters below. The touch position is projected onto the plane of the block tops.
 **Why:** boards of different sizes and screens of different aspect ratios need no per-level or per-device camera values.
 
-## One scene, one composition root
-**Decision:** `GameScene` is the only scene; home, gameplay and the popups are screens switched on and off. One bootstrap object constructs the logic objects and passes them to the views.
-**Why:** no scene loading between screens, and every dependency is visible in one place. There is no singleton and no service locator.
+## Two scenes, each with its own composition root
+**Decision:** `HomeScene` is the first scene and holds the home screen and the settings; `GameScene` holds the board, the HUD and the popups of a level. Each scene has one root object (`HomeRoot`, `GameRoot`) that creates the logic objects and passes them to the views of that scene. Nothing is carried from one scene to the other in memory: each root loads the player's state from the storage. `GameScene` starts the level the player has reached, so it also plays when it is opened alone in the Editor.
+**Why:** the menu and the game do not share objects, so each scene stays small, loads only what it shows and can be worked on alone. Passing state through the storage needs no singleton, no static and no object that survives a scene load.
+**Alternatives:** one scene with screens switched on and off, which was the first version: no loading between screens, but every screen and the board sat in one file. A persistent boot scene with additive loading: one composition root for the whole game, at the cost of a third scene and a rule for finding each scene's views.
+
+## Screens and repeated UI parts are prefabs
+**Decision:** every screen and popup is a prefab in `Prefabs/UI/` with its own canvas, and a part that repeats (a setting row, a booster button, a level node) is a prefab nested in its screen. The settings popup is one prefab used by both scenes. The values that set how the UI moves (button press, popup opening) are in one `UiMotion` asset.
+**Why:** a screen can be opened and changed alone, a change to a repeated part is made once, and a value that changes on one screen (the timer) does not rebuild the others.
 
 ## The flow between screens is logic
 **Decision:** `GameFlow` in `Scripts/Core/Flow/` starts, restarts and leaves levels and decides what a win is worth. The screens only show values and report button presses; one view class, `GameScreens`, shows the screen that fits the flow's events and passes each press on.
@@ -152,4 +158,5 @@ Entry format:
 ## Open
 
 - **Unused template packages**: whether to remove `com.unity.collab-proxy`, `com.unity.visualscripting` and `com.unity.ide.vscode` from `Packages/manifest.json`.
-- **Third-party plugins**: DOTween and Lean Pool are in `Assets/Plugins/`. Record where they came from and what each is used for, or remove the one that ends up unused.
+- **Third-party plugins**: DOTween (UI and board animation) and Lean Pool (the board's pools) are in `Assets/Plugins/`. Record where they came from for the README.
+- **Settings have no effect yet**: the vibration, sound and music switches are saved and shown, but nothing in the game listens to them. There are no audio assets in the supplied art.

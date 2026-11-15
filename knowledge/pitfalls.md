@@ -13,6 +13,8 @@ Failure modes that fit this project's stack (DOTween, Lean Pool, uGUI, a timer, 
 ## Pooled objects
 
 - An object returned to Lean Pool is disabled, not destroyed: `this == null` stays false and `OnDestroy` does not run. A callback that captured it still sees a live object, now possibly reused as a different block.
+- A pooled view is given back through its `Release` method, which stops its tweens and frees what it holds; `BoardView` and `BoardFrame` are the only callers of a pool. A new field on a pooled view is set again in its `Show`, or it keeps the value of the block or door before it.
+- A view or a screen that a designer can tune or reuse is a prefab in `Prefabs/`, and a value that sets how it looks or moves is a serialized field on that prefab. Do not build such an object in code.
 - Reset everything in `OnEnable` or the spawn hook: colour, scale, rotation, parent, running tweens, event subscriptions. `Awake` and `Start` run only the first time.
 - Despawn while a tween runs on the object: kill the tween first.
 
