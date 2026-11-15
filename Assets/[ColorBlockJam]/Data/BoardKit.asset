@@ -20,4 +20,8 @@ MonoBehaviour:
     type: 3}
   _blockInnerCorner: {fileID: 3222031244701842341, guid: bd1ea0ba7182d45e393123b64377d436,
     type: 3}
+  _arrows:
+  - {fileID: -4135818882167075391, guid: 8d26d6d66624e42d68d326cfd30499a2, type: 3}
+  - {fileID: -1341611790480939518, guid: 8d26d6d66624e42d68d326cfd30499a2, type: 3}
+  - {fileID: 7264089000736223243, guid: 8d26d6d66624e42d68d326cfd30499a2, type: 3}
   _palette: {fileID: 11400000, guid: ca48d1deea5964b08b05db17710595f4, type: 2}

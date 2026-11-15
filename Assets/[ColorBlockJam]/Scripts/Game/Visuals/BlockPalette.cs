@@ -9,6 +9,11 @@ namespace ColorBlockJam.Game.Visuals
     {
         [SerializeField] private List<BlockLook> _looks = new List<BlockLook>();
 
+        [Tooltip("How a block or a door looks while it is under ice, whatever its colour.")]
+        [SerializeField] private Material _ice;
+
+        public Material Ice => _ice;
+
         public bool TryGetMaterial(BlockColor blockColor, out Material material)
         {
             for (int i = 0; i < _looks.Count; i++)

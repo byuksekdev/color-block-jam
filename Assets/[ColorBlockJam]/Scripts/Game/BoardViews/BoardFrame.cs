@@ -107,6 +107,19 @@ namespace ColorBlockJam.Game.BoardViews
             _exitEffects.Clear();
         }
 
+        /// <summary>Shows how much ice is left on every door.</summary>
+        public void ShowIce()
+        {
+            for (int i = 0; i < _doors.Count; i++)
+            {
+                Door door = _board.Doors[i];
+                if (door.IceCount > 0)
+                {
+                    _doors[i].ShowIce(_board.IceLeft(door), _palette.Ice);
+                }
+            }
+        }
+
         /// <summary>Opens the door for a block that leaves from this cell, and throws out cubes of its colour where it passes.</summary>
         public void LetOut(Block block, Cell origin, Door door)
         {

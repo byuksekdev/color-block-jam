@@ -29,3 +29,4 @@ MonoBehaviour:
     _material: {fileID: 2100000, guid: 209152ac55eb04cbe95cb9b7c7015fa9, type: 2}
   - _blockColor: 8
     _material: {fileID: 2100000, guid: 51df5e1eeab77471eae89667537552d6, type: 2}
+  _ice: {fileID: 2100000, guid: 29778b2e5bf0840bb8c3983a6cbf78f7, type: 2}
