@@ -21,6 +21,7 @@ namespace ColorBlockJam.LevelEditor
         private readonly List<Button> _shapeButtons = new List<Button>();
         private readonly List<ShapePreview> _shapePreviews = new List<ShapePreview>();
         private readonly Label _hint = new Label();
+        private readonly VisualElement _toolOptions = new VisualElement();
         private readonly ShapePreview _chosenShape = new ShapePreview();
 
         public ToolPanel(IReadOnlyList<IBoardTool> tools, BlockPalette palette)
@@ -61,6 +62,7 @@ namespace ColorBlockJam.LevelEditor
             }
 
             _hint.text = _tools[toolIndex].Hint;
+            ShowOptions(_tools[toolIndex].Options);
             _chosenShape.Show(shape, tint);
         }
 
@@ -78,6 +80,21 @@ namespace ColorBlockJam.LevelEditor
 
             _hint.AddToClassList("hint");
             Add(_hint);
+            Add(_toolOptions);
+        }
+
+        private void ShowOptions(VisualElement options)
+        {
+            if (options != null && options.parent == _toolOptions)
+            {
+                return;
+            }
+
+            _toolOptions.Clear();
+            if (options != null)
+            {
+                _toolOptions.Add(options);
+            }
         }
 
         private void AddColorButtons()

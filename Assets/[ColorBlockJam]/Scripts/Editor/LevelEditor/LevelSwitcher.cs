@@ -1,5 +1,6 @@
 using System;
 using ColorBlockJam.Core.Data;
+using ColorBlockJam.Core.Validation;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace ColorBlockJam.LevelEditor
 {
     /// <summary>
     /// Opens, creates, deletes, reorders, saves and plays levels for the editor window. It asks the
-    /// designer before changes would be lost or a level is deleted.
+    /// designer before changes would be lost, a level is deleted, or a level that cannot be solved is saved.
     /// </summary>
     internal sealed class LevelSwitcher
     {
@@ -93,18 +94,25 @@ namespace ColorBlockJam.LevelEditor
             Changed?.Invoke();
         }
 
-        public void Save()
+        /// <summary>Saves the open level. Returns false when the designer kept a level that cannot be solved from being saved.</summary>
+        public bool Save()
         {
+            if (!ConfirmUnsolvable())
+            {
+                return false;
+            }
+
             _library.Save(_open.File, _open.Data);
             Changed?.Invoke();
+            return true;
         }
 
         /// <summary>Plays the open level in the game. Unsaved changes are saved first, because the game reads the file.</summary>
         public void Play()
         {
-            if (_open.HasUnsavedChanges)
+            if (_open.HasUnsavedChanges && !Save())
             {
-                Save();
+                return;
             }
 
             LevelPlayback.Play(_library.IndexOf(_open.File));
@@ -138,10 +146,31 @@ namespace ColorBlockJam.LevelEditor
             int choice = EditorUtility.DisplayDialogComplex("Unsaved changes", question, "Save", "Cancel", "Discard");
             if (choice == SaveChoice)
             {
-                Save();
+                return Save();
             }
 
             return choice != CancelChoice;
+        }
+
+        /// <summary>
+        /// Warns when the level cannot be solved and lets the designer save it anyway. A level that is
+        /// not well formed is not tried: the problems list already says what is wrong with it.
+        /// </summary>
+        private bool ConfirmUnsolvable()
+        {
+            if (LevelValidator.Validate(_open.Data).Count > 0)
+            {
+                return true;
+            }
+
+            SolverResult result = LevelSolver.Solve(_open.Data);
+            if (result.Solvability != Solvability.Unsolvable)
+            {
+                return true;
+            }
+
+            string warning = _open.File.name + " cannot be solved.\n\n" + result.Reason;
+            return EditorUtility.DisplayDialog("Level cannot be solved", warning, "Save anyway", "Do not save");
         }
     }
 }

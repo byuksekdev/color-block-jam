@@ -1,4 +1,5 @@
 using ColorBlockJam.Core.Editing;
+using UnityEngine.UIElements;
 
 namespace ColorBlockJam.LevelEditor
 {
@@ -13,6 +14,7 @@ namespace ColorBlockJam.LevelEditor
 
         public string Label => "Erase";
         public string Hint => "Click a block or a door to remove it. Right click does the same with any tool.";
+        public VisualElement Options => null;
 
         public void PointerDown(BoardHit hit)
         {

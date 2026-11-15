@@ -1,4 +1,5 @@
 using ColorBlockJam.Core.Editing;
+using UnityEngine.UIElements;
 
 namespace ColorBlockJam.LevelEditor
 {
@@ -13,6 +14,7 @@ namespace ColorBlockJam.LevelEditor
 
         public string Label => "Block";
         public string Hint => "Click a cell to place the chosen shape. R turns it, F mirrors it.";
+        public VisualElement Options => null;
 
         public void PointerDown(BoardHit hit)
         {

@@ -1,6 +1,7 @@
 using ColorBlockJam.Core.Boards;
 using ColorBlockJam.Core.Data;
 using ColorBlockJam.Core.Editing;
+using UnityEngine.UIElements;
 
 namespace ColorBlockJam.LevelEditor
 {
@@ -18,6 +19,7 @@ namespace ColorBlockJam.LevelEditor
 
         public string Label => "Door";
         public string Hint => "Drag along the strip beside the board to place a door of the chosen colour.";
+        public VisualElement Options => null;
 
         public void PointerDown(BoardHit hit)
         {

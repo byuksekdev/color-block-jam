@@ -1,3 +1,4 @@
+using ColorBlockJam.Core.Boards;
 using ColorBlockJam.Core.Data;
 using UnityEngine;
 
@@ -41,6 +42,16 @@ namespace ColorBlockJam.LevelEditor
             return new Rect(
                 _origin.x + cell.X * CellSize,
                 _origin.y + (_height - 1 - cell.Y) * CellSize,
+                CellSize,
+                CellSize);
+        }
+
+        /// <summary>A square of one cell's size around a point of the board.</summary>
+        public Rect RectAround(BoardPoint point)
+        {
+            return new Rect(
+                _origin.x + (point.X - 0.5f) * CellSize,
+                _origin.y + (_height - point.Y - 0.5f) * CellSize,
                 CellSize,
                 CellSize);
         }

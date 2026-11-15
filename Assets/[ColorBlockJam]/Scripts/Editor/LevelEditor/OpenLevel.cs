@@ -18,7 +18,13 @@ namespace ColorBlockJam.LevelEditor
         public LevelData Data => _data;
         public TextAsset File => _file;
         public bool Exists => _file != null;
-        public bool HasUnsavedChanges => Exists && LevelSerializer.ToJson(_data) != _file.text;
+
+        /// <summary>
+        /// True when saving would change the level. The file is read and written again for the
+        /// comparison, so a file from before a field was added does not count as changed.
+        /// </summary>
+        public bool HasUnsavedChanges =>
+            Exists && LevelSerializer.ToJson(_data) != LevelSerializer.ToJson(LevelSerializer.FromJson(_file.text));
 
         public void Set(TextAsset file, LevelData data)
         {

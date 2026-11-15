@@ -61,8 +61,10 @@ namespace ColorBlockJam.LevelEditor
 
         public override void SaveChanges()
         {
-            _levels.Save();
-            base.SaveChanges();
+            if (_levels.Save())
+            {
+                base.SaveChanges();
+            }
         }
 
         [MenuItem(MenuPath)]
@@ -90,7 +92,10 @@ namespace ColorBlockJam.LevelEditor
             _levels.Changed += RefreshAll;
             _palette = EditorAssets.FindPalette();
             _eraseTool = new EraseTool(this);
-            _tools = new IBoardTool[] { new BlockTool(this), new DoorTool(this), new MoveTool(this), _eraseTool };
+            _tools = new IBoardTool[]
+            {
+                new BlockTool(this), new DoorTool(this), new MoveTool(this), new IceTool(this), new ArrowTool(this), _eraseTool,
+            };
 
             if (_shape.Count == 0)
             {
@@ -148,7 +153,7 @@ namespace ColorBlockJam.LevelEditor
         private VisualElement BuildMain()
         {
             _header = new EditorHeader();
-            _header.SaveRequested += _levels.Save;
+            _header.SaveRequested += () => _levels.Save();
             _header.PlayRequested += _levels.Play;
 
             _canvas = new BoardCanvas();

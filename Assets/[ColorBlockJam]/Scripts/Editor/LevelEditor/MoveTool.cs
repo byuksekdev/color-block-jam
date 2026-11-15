@@ -1,5 +1,6 @@
 using ColorBlockJam.Core.Data;
 using ColorBlockJam.Core.Editing;
+using UnityEngine.UIElements;
 
 namespace ColorBlockJam.LevelEditor
 {
@@ -16,6 +17,7 @@ namespace ColorBlockJam.LevelEditor
 
         public string Label => "Move";
         public string Hint => "Drag a block to another place on the board.";
+        public VisualElement Options => null;
 
         public void PointerDown(BoardHit hit)
         {

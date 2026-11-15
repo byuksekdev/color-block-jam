@@ -12,21 +12,20 @@ namespace ColorBlockJam.LevelEditor
     internal sealed class BoardCanvas : VisualElement
     {
         private const float CellGap = 1f;
-        private const float BlockInset = 2f;
-        private const float StudRadius = 0.2f;
-        private const float StudLightness = 0.22f;
         private const float DoorThickness = 0.45f;
         private const float DoorSlotThickness = 1f;
         private const float PreviewAlpha = 0.65f;
         private const float FadedAlpha = 0.25f;
+        private const float IceAlpha = 0.7f;
 
         private static readonly Color BoardColor = new Color(0.17f, 0.2f, 0.29f);
         private static readonly Color CellColor = new Color(0.36f, 0.41f, 0.53f);
         private static readonly Color DoorSlotColor = new Color(1f, 1f, 1f, 0.07f);
         private static readonly Color InvalidColor = new Color(0.9f, 0.15f, 0.15f);
-        private static readonly Cell[] NeighbourSteps = { new Cell(-1, 0), new Cell(1, 0), new Cell(0, -1), new Cell(0, 1) };
+        private static readonly Color IceColor = new Color(0.62f, 0.86f, 1f);
 
         private readonly List<Cell> _previewCells = new List<Cell>();
+        private readonly IceCountLabels _iceCounts = new IceCountLabels();
         private LevelData _level;
         private BlockPalette _palette;
         private Color _previewColor;
@@ -38,6 +37,8 @@ namespace ColorBlockJam.LevelEditor
             AddToClassList("board-canvas");
             focusable = true;
             generateVisualContent += Draw;
+            Add(_iceCounts);
+            RegisterCallback<GeometryChangedEvent>(geometryEvent => ShowIceCounts());
             RegisterCallback<PointerDownEvent>(OnPointerDown);
             RegisterCallback<PointerMoveEvent>(OnPointerMove);
             RegisterCallback<PointerUpEvent>(OnPointerUp);
@@ -53,6 +54,7 @@ namespace ColorBlockJam.LevelEditor
         {
             _level = level;
             _palette = palette;
+            ShowIceCounts();
             MarkDirtyRepaint();
         }
 
@@ -89,6 +91,18 @@ namespace ColorBlockJam.LevelEditor
             _previewDoor = null;
             _fadedBlock = LevelEditing.NotFound;
             MarkDirtyRepaint();
+        }
+
+        private void ShowIceCounts()
+        {
+            if (TryGetLayout(out BoardLayout layout))
+            {
+                _iceCounts.Show(_level, layout);
+            }
+            else
+            {
+                _iceCounts.HideAll();
+            }
         }
 
         private bool TryGetLayout(out BoardLayout layout)
@@ -191,6 +205,13 @@ namespace ColorBlockJam.LevelEditor
             Color tint = EditorTint.Of(_palette, door.Color);
             tint.a = alpha;
             painter.FillRect(layout.DoorRect(door.Side, door.Start, door.Length, DoorThickness), tint);
+
+            if (door.IceCount > 0)
+            {
+                Color ice = IceColor;
+                ice.a = IceAlpha * alpha;
+                painter.FillRect(layout.DoorRect(door.Side, door.Start, door.Length, DoorSlotThickness), ice);
+            }
         }
 
         private void DrawBlocks(Painter2D painter, BoardLayout layout)
@@ -200,7 +221,19 @@ namespace ColorBlockJam.LevelEditor
                 BlockData block = _level.Blocks[i];
                 Color tint = EditorTint.Of(_palette, block.Color);
                 tint.a = i == _fadedBlock ? FadedAlpha : 1f;
-                DrawBlock(painter, layout, block.Cells, tint);
+                painter.FillBlock(layout, block.Cells, tint);
+
+                if (block.IceCount > 0)
+                {
+                    Color ice = IceColor;
+                    ice.a = IceAlpha * tint.a;
+                    painter.FillBlock(layout, block.Cells, ice);
+                }
+
+                if (block.Axis != BlockAxis.Any && block.Cells.Count > 0)
+                {
+                    painter.StrokeArrow(layout, block);
+                }
             }
         }
 
@@ -210,36 +243,12 @@ namespace ColorBlockJam.LevelEditor
             {
                 Color tint = _previewColor;
                 tint.a = PreviewAlpha;
-                DrawBlock(painter, layout, _previewCells, tint);
+                painter.FillBlock(layout, _previewCells, tint);
             }
 
             if (_previewDoor != null)
             {
                 DrawDoor(painter, layout, _previewDoor, PreviewAlpha);
-            }
-        }
-
-        private static void DrawBlock(Painter2D painter, BoardLayout layout, List<Cell> cells, Color tint)
-        {
-            Color studColor = Color.Lerp(tint, Color.white, StudLightness);
-            studColor.a = tint.a;
-
-            for (int i = 0; i < cells.Count; i++)
-            {
-                Rect rect = layout.CellRect(cells[i]);
-                float left = cells.Contains(cells[i] + NeighbourSteps[0]) ? 0f : BlockInset;
-                float right = cells.Contains(cells[i] + NeighbourSteps[1]) ? 0f : BlockInset;
-                float bottom = cells.Contains(cells[i] + NeighbourSteps[2]) ? 0f : BlockInset;
-                float top = cells.Contains(cells[i] + NeighbourSteps[3]) ? 0f : BlockInset;
-
-                painter.FillRect(
-                    Rect.MinMaxRect(rect.xMin + left, rect.yMin + top, rect.xMax - right, rect.yMax - bottom),
-                    tint);
-
-                painter.fillColor = studColor;
-                painter.BeginPath();
-                painter.Arc(rect.center, layout.CellSize * StudRadius, 0f, 360f);
-                painter.Fill();
             }
         }
 

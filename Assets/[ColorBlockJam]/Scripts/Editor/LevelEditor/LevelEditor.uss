@@ -151,3 +151,27 @@
     margin-left: 6px;
     -unity-font-style: bold;
 }
+
+.wide-stepper > .stepper-title {
+    width: auto;
+    flex-grow: 1;
+}
+
+.ice-counts {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.ice-count {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(20, 60, 110);
+}
