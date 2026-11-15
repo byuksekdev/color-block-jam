@@ -32,6 +32,8 @@ namespace ColorBlockJam.Core.Flow
         /// <summary>The index of the level being played. It keeps counting after the last level file.</summary>
         public int LevelIndex { get; private set; }
 
+        public bool IsInLevel => _session != null;
+
         /// <summary>Starts the level the player has reached.</summary>
         public void StartLevel()
         {

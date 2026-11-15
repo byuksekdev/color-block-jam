@@ -6,7 +6,6 @@ namespace ColorBlockJam.Game.BoardViews
     [RequireComponent(typeof(Camera))]
     public sealed class BoardCamera : MonoBehaviour
     {
-        private const float FrameThickness = 1f;
         private const float MinDistance = 4f;
         private const float MaxDistance = 200f;
         private const int SearchSteps = 16;
@@ -27,7 +26,7 @@ namespace ColorBlockJam.Game.BoardViews
 
         public void Frame(BoardSpace space)
         {
-            Vector3 margin = new Vector3(FrameThickness, 0f, FrameThickness);
+            Vector3 margin = new Vector3(BoardFrame.Thickness, 0f, BoardFrame.Thickness);
             Vector3 min = space.Min - margin;
             Vector3 max = space.Max + margin + Vector3.up * BoardView.BlockTop;
             for (int i = 0; i < BoundsCorners; i++)

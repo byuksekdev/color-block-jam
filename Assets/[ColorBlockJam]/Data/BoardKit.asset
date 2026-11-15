@@ -20,16 +20,4 @@ MonoBehaviour:
     type: 3}
   _blockInnerCorner: {fileID: 3222031244701842341, guid: bd1ea0ba7182d45e393123b64377d436,
     type: 3}
-  _groundTile: {fileID: 9127120572191758296, guid: aff79dc9a7dd1484f87af377b6bb2b06,
-    type: 3}
-  _wall: {fileID: 8733429697405204941, guid: f2de6a5a1ccd84ad5820f8e62c298dce, type: 3}
-  _wallCorner: {fileID: 5732635521261682974, guid: f2de6a5a1ccd84ad5820f8e62c298dce,
-    type: 3}
-  _door: {fileID: -621459505486514712, guid: f2de6a5a1ccd84ad5820f8e62c298dce, type: 3}
-  _doorArrow: {fileID: 2650694734197125860, guid: f2de6a5a1ccd84ad5820f8e62c298dce,
-    type: 3}
-  _gridMaterial: {fileID: 2100000, guid: 76e930757b792497cb4d61950e10322b, type: 2}
-  _groundMaterial: {fileID: 2100000, guid: 0d6cadd7839844ecf902bb2f3889eabf, type: 2}
-  _wallMaterial: {fileID: 2100000, guid: 3a7dd014262d0485783d3ca5cd02c35c, type: 2}
-  _doorArrowMaterial: {fileID: 2100000, guid: 10f9a1b8be4084e95b4a4c393eec37d8, type: 2}
   _palette: {fileID: 11400000, guid: ca48d1deea5964b08b05db17710595f4, type: 2}

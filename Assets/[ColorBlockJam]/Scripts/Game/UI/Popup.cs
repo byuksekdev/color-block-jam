@@ -6,9 +6,7 @@ namespace ColorBlockJam.Game.UI
     /// <summary>A panel shown over the screen behind it. It pops in when shown.</summary>
     public abstract class Popup : MonoBehaviour
     {
-        private const float ShowSeconds = 0.2f;
-        private const float StartScale = 0.85f;
-
+        [SerializeField] private UiMotion _motion;
         [SerializeField] private RectTransform _panel;
         [SerializeField] private CanvasGroup _canvasGroup;
 
@@ -17,10 +15,10 @@ namespace ColorBlockJam.Game.UI
             gameObject.SetActive(true);
             StopTweens();
 
-            _panel.localScale = Vector3.one * StartScale;
+            _panel.localScale = Vector3.one * _motion.PopupStartScale;
             _canvasGroup.alpha = 0f;
-            _panel.DOScale(1f, ShowSeconds).SetEase(Ease.OutBack).SetLink(gameObject);
-            _canvasGroup.DOFade(1f, ShowSeconds).SetLink(gameObject);
+            _panel.DOScale(1f, _motion.PopupSeconds).SetEase(Ease.OutBack).SetLink(gameObject);
+            _canvasGroup.DOFade(1f, _motion.PopupSeconds).SetLink(gameObject);
         }
 
         public void Hide()

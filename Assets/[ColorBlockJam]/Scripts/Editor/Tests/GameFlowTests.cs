@@ -42,6 +42,18 @@ namespace ColorBlockJam.Tests
         }
 
         [Test]
+        public void IsInLevel_BeforeStartInALevelAndAfterLeaving_TellsWhetherALevelIsPlayed()
+        {
+            Assert.IsFalse(_flow.IsInLevel, "before the first level");
+
+            _flow.StartLevel();
+            Assert.IsTrue(_flow.IsInLevel, "in a level");
+
+            _flow.LeaveLevel();
+            Assert.IsFalse(_flow.IsInLevel, "after leaving");
+        }
+
+        [Test]
         public void StartLevel_NewPlayer_StartsTheFirstLevelAndWaitsForTheFirstTouch()
         {
             _flow.StartLevel();

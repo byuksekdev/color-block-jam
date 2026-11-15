@@ -1,3 +1,4 @@
+using System.IO;
 using ColorBlockJam.Game;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -6,8 +7,8 @@ using UnityEngine;
 namespace ColorBlockJam.LevelEditor
 {
     /// <summary>
-    /// Plays a level of the catalog in the game scene, whichever scene is open. The request is kept
-    /// in the editor session, because entering Play Mode reloads the editor's code.
+    /// Plays a level of the catalog in the game scene, whichever scene is open, without passing through
+    /// the home scene. The request is kept in the editor session, because entering Play Mode reloads the editor's code.
     /// </summary>
     [InitializeOnLoad]
     internal static class LevelPlayback
@@ -76,7 +77,7 @@ namespace ColorBlockJam.LevelEditor
             EditorBuildSettingsScene[] scenes = EditorBuildSettings.scenes;
             for (int i = 0; i < scenes.Length; i++)
             {
-                if (scenes[i].enabled)
+                if (scenes[i].enabled && Path.GetFileNameWithoutExtension(scenes[i].path) == SceneNames.Game)
                 {
                     return AssetDatabase.LoadAssetAtPath<SceneAsset>(scenes[i].path);
                 }

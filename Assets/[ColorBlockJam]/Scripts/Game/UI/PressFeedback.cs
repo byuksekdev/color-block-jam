@@ -7,12 +7,11 @@ namespace ColorBlockJam.Game.UI
     /// <summary>Makes a button shrink a little while it is pressed, whether or not the button does anything.</summary>
     public sealed class PressFeedback : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
-        private const float PressedScale = 0.9f;
-        private const float Seconds = 0.08f;
+        [SerializeField] private UiMotion _motion;
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            ScaleTo(PressedScale);
+            ScaleTo(_motion.PressedScale);
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -29,7 +28,7 @@ namespace ColorBlockJam.Game.UI
         private void ScaleTo(float scale)
         {
             transform.DOKill();
-            transform.DOScale(scale, Seconds).SetLink(gameObject);
+            transform.DOScale(scale, _motion.PressSeconds).SetLink(gameObject);
         }
     }
 }
