@@ -51,7 +51,7 @@ MonoBehaviour:
   _bodyRenderer: {fileID: 1774572178201134529}
   _arrow: {fileID: 2587148799734092863}
   _iceCount: {fileID: 2010559389195882331}
-  _sinkDepth: 1
+  _sinkDepth: 0.75
   _sinkSeconds: 0.12
   _openSeconds: 0.3
 --- !u!1 &350344860943988028

@@ -765,7 +765,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 0.95, b: 0.95, a: 1}
-  m_Intensity: 1
+  m_Intensity: 1.05
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -970,6 +970,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AdditionalShaderChannelsFlag
       value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 8146428678314737051, guid: 3ba993c19a7c548a88e1cd478a62f268,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.93075114
+      objectReference: {fileID: 0}
+    - target: {fileID: 8146428678314737051, guid: 3ba993c19a7c548a88e1cd478a62f268,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.039906103
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

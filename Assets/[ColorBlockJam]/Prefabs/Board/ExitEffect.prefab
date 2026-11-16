@@ -117,8 +117,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.9
-      minScalar: 0.55
+      scalar: 1.25
+      minScalar: 0.75
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -540,7 +540,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 2
+      scalar: 0.25
       minScalar: 0.1
       maxCurve:
         serializedVersion: 2
@@ -4668,9 +4668,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _particles: {fileID: 19822154}
   _renderer: {fileID: 19921680}
-  _cubesPerCell: 6
+  _cubesPerCell: 8
   _mouthCenter: {x: 0, y: 0.9, z: 0.5}
   _mouthSize: {x: 1.6, y: 1, z: 0.4}
-  _minSpeed: 2.5
+  _minSpeed: 3.5
   _maxSpeed: 5
   _drift: 1

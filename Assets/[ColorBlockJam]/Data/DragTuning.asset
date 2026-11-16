@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: DragTuning
   m_EditorClassIdentifier: 
   _blockOverlap: 0.12
-  _doorReach: 0.45
+  _doorReach: 0.5
