@@ -8,8 +8,8 @@ using UnityEngine;
 namespace ColorBlockJam.Game.BoardViews
 {
     /// <summary>
-    /// The frame around the board: walls, corners and doors, taken from pools. A wall, a door and
-    /// the effect of a block leaving are one cell long at scale 1 and are stretched along their side.
+    /// The frame around the board: walls, corners and doors, taken from pools. A wall and a door
+    /// are one cell long at scale 1 and are stretched along their side.
     /// </summary>
     public sealed class BoardFrame : MonoBehaviour
     {
@@ -120,8 +120,11 @@ namespace ColorBlockJam.Game.BoardViews
             }
         }
 
-        /// <summary>Opens the door for a block that leaves from this cell, and throws out cubes of its colour where it passes.</summary>
-        public void LetOut(Block block, Cell origin, Door door)
+        /// <summary>
+        /// Opens the door for a block that leaves from this cell. Returns the cubes of the block's colour
+        /// that come out where it passes; they come out as the block tells them how far it has gone.
+        /// </summary>
+        public ExitEffect LetOut(Block block, Cell origin, Door door)
         {
             for (int i = 0; i < _board.Doors.Count; i++)
             {
@@ -139,8 +142,9 @@ namespace ColorBlockJam.Game.BoardViews
 
             _palette.TryGetMaterial(block.Color, out Material material);
             effect.Finished += TakeAway;
-            effect.Play(cells, material);
+            effect.Play(block, door.Side, material);
             _exitEffects.Add(effect);
+            return effect;
         }
 
         private void FindDoors(BoardSide side, int length, Door[] doorAt)

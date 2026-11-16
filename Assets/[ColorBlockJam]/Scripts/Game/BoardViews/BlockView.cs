@@ -15,6 +15,8 @@ namespace ColorBlockJam.Game.BoardViews
         private static readonly Quaternion AlongX = Quaternion.identity;
         private static readonly Quaternion AlongZ = Quaternion.Euler(0f, 90f, 0f);
 
+        [Tooltip("Everything of the block that leans while it is dragged. It stands on the middle of the block, so the block leans around its middle.")]
+        [SerializeField] private Transform _body;
         [SerializeField] private MeshFilter _meshFilter;
         [SerializeField] private MeshRenderer _renderer;
 
@@ -31,8 +33,20 @@ namespace ColorBlockJam.Game.BoardViews
         [Tooltip("How far a block is lifted above the board while a finger holds it.")]
         [SerializeField] private float _heldLift = 0.35f;
 
+        [Tooltip("Degrees a held block leans for each unit per second it moves.")]
+        [SerializeField] private float _leanPerSpeed = 1.2f;
+
+        [Tooltip("The most a held block leans, in degrees.")]
+        [SerializeField] private float _maxLean = 12f;
+
+        [Tooltip("Seconds the lean of a held block takes to follow a change of its speed.")]
+        [SerializeField] private float _leanSeconds = 0.1f;
+
         [Tooltip("Seconds a block takes to come to rest on its cell after the finger lets go.")]
         [SerializeField] private float _settleSeconds = 0.08f;
+
+        [Tooltip("Seconds a block takes to stand upright again after the finger lets go.")]
+        [SerializeField] private float _uprightSeconds = 0.25f;
 
         [Tooltip("Seconds a block takes to line up with its door before it slides out.")]
         [SerializeField] private float _alignSeconds = 0.08f;
@@ -46,8 +60,11 @@ namespace ColorBlockJam.Game.BoardViews
         private Material _material;
         private bool _hasArrow;
         private float _restHeight;
+        private Vector2 _lean;
+        private ExitEffect _exitEffect;
         private Vector3 _exitDirection;
-        private float _doorLine;
+        private float _doorstep;
+        private float _front;
 
         /// <summary>The block has gone through its door and can be taken away.</summary>
         public event Action<BlockView> Left;
@@ -55,6 +72,7 @@ namespace ColorBlockJam.Game.BoardViews
         /// <summary>
         /// Takes over the mesh: the view destroys it when it is released. The marks of the block,
         /// its ice count and its arrow, lie over the middle point, which is given from the block's origin.
+        /// The mesh starts at the block's origin.
         /// </summary>
         public void Show(Mesh mesh, Material material, Vector3 position, Vector3 middle)
         {
@@ -65,11 +83,13 @@ namespace ColorBlockJam.Game.BoardViews
             _outline.sharedMesh = mesh;
             _renderer.sharedMaterial = material;
             transform.position = position;
+            _body.localPosition = middle;
+            _body.localRotation = Quaternion.identity;
+            _meshFilter.transform.localPosition = -middle;
+            _lean = Vector2.zero;
             ShowOutline(false);
 
             _iceCount.gameObject.SetActive(false);
-            MoveOver(_iceCount.transform, middle);
-            MoveOver(_arrow, middle);
             _hasArrow = false;
             _arrow.gameObject.SetActive(false);
         }
@@ -99,11 +119,15 @@ namespace ColorBlockJam.Game.BoardViews
             }
         }
 
-        /// <summary>Follows the finger: the block is held slightly above the board.</summary>
+        /// <summary>
+        /// Follows the finger: the block is held slightly above the board and leans the way it moves.
+        /// Call it every frame the block is held, also when it has not moved, so the lean can fade.
+        /// </summary>
         public void Follow(Vector3 position)
         {
-            transform.DOKill();
+            StopMoving();
             position.y = _restHeight + _heldLift;
+            LeanWith(position - transform.position);
             transform.position = position;
             ShowOutline(true);
         }
@@ -111,9 +135,10 @@ namespace ColorBlockJam.Game.BoardViews
         /// <summary>Comes to rest on a cell after the finger let go.</summary>
         public void SettleAt(Vector3 position)
         {
-            transform.DOKill();
+            StopMoving();
             position.y = _restHeight;
             transform.DOMove(position, _settleSeconds).SetLink(gameObject);
+            StandUpright(_uprightSeconds).SetEase(Ease.OutBack);
             ShowOutline(false);
         }
 
@@ -121,37 +146,40 @@ namespace ColorBlockJam.Game.BoardViews
         /// Lines up on the doorstep, the place of the cell it leaves from, then moves out by the offset
         /// and reports that it has left. What passes the door line, where its front stands on the
         /// doorstep, is cut off, so the block goes into the door instead of through the frame.
+        /// The cubes are told how far the block has gone through, every time it moves.
         /// </summary>
-        public void Leave(Vector3 doorstep, Vector3 offset)
+        public void Leave(Vector3 doorstep, Vector3 offset, ExitEffect cubes)
         {
-            transform.DOKill();
+            StopMoving();
             ShowOutline(false);
             _arrow.gameObject.SetActive(false);
             doorstep.y = _restHeight;
 
             _mesh.GetVertices(_wholeShape);
+            _exitEffect = cubes;
             _exitDirection = offset.normalized;
-            float front = float.MinValue;
+            _doorstep = Vector3.Dot(doorstep, _exitDirection);
+            _front = float.MinValue;
             for (int i = 0; i < _wholeShape.Count; i++)
             {
-                front = Mathf.Max(front, Vector3.Dot(_wholeShape[i], _exitDirection));
+                _front = Mathf.Max(_front, Vector3.Dot(_wholeShape[i], _exitDirection));
             }
 
-            _doorLine = Vector3.Dot(doorstep, _exitDirection) + front;
-
+            StandUpright(_alignSeconds);
             DOTween.Sequence()
                 .Append(transform.DOMove(doorstep, _alignSeconds))
                 .Append(transform.DOMove(doorstep + offset, _leaveSeconds).SetEase(Ease.InQuad))
                 .SetTarget(transform)
                 .SetLink(gameObject)
-                .OnUpdate(CutAtDoorLine)
+                .OnUpdate(GoThroughDoor)
                 .OnComplete(RaiseLeft);
         }
 
         /// <summary>Stops what the block is doing and gives up its mesh, before the object goes back to the pool.</summary>
         public void Release()
         {
-            transform.DOKill();
+            StopMoving();
+            _exitEffect = null;
             ShowOutline(false);
             _meshFilter.sharedMesh = null;
             _outline.sharedMesh = null;
@@ -164,10 +192,14 @@ namespace ColorBlockJam.Game.BoardViews
             Destroy(_mesh);
         }
 
-        /// <summary>Flattens every vertex that has passed the door line onto it. The mesh is the block's own, so nothing has to be put back.</summary>
-        private void CutAtDoorLine()
+        /// <summary>
+        /// Flattens every vertex that has passed the door line onto it, and has the cubes come out for
+        /// what has passed. The mesh is the block's own, so nothing has to be put back.
+        /// </summary>
+        private void GoThroughDoor()
         {
-            float limit = _doorLine - Vector3.Dot(transform.position, _exitDirection);
+            float passed = Vector3.Dot(transform.position, _exitDirection) - _doorstep;
+            float limit = _front - passed;
             _cutShape.Clear();
             for (int i = 0; i < _wholeShape.Count; i++)
             {
@@ -177,6 +209,35 @@ namespace ColorBlockJam.Game.BoardViews
             }
 
             _mesh.SetVertices(_cutShape);
+            _exitEffect.ShowPassed(passed);
+        }
+
+        /// <summary>Leans towards the way the block has moved since the last frame: its leading edge dips.</summary>
+        private void LeanWith(Vector3 moved)
+        {
+            float seconds = Time.deltaTime;
+            if (seconds <= 0f)
+            {
+                return;
+            }
+
+            // The lean is limited after it is smoothed: a finger reports its moves less often than frames
+            // are drawn, so the speed of a single frame says little.
+            var wanted = new Vector2(moved.z, -moved.x) * (_leanPerSpeed / seconds);
+            _lean = Vector2.ClampMagnitude(Vector2.Lerp(_lean, wanted, seconds / _leanSeconds), _maxLean);
+            _body.localRotation = Quaternion.Euler(_lean.x, 0f, _lean.y);
+        }
+
+        private Tween StandUpright(float seconds)
+        {
+            _lean = Vector2.zero;
+            return _body.DOLocalRotateQuaternion(Quaternion.identity, seconds).SetLink(gameObject);
+        }
+
+        private void StopMoving()
+        {
+            transform.DOKill();
+            _body.DOKill();
         }
 
         private void ShowOutline(bool isShown)
@@ -185,14 +246,6 @@ namespace ColorBlockJam.Game.BoardViews
             {
                 _outline.gameObject.SetActive(isShown);
             }
-        }
-
-        private static void MoveOver(Transform mark, Vector3 middle)
-        {
-            Vector3 position = mark.localPosition;
-            position.x = middle.x;
-            position.z = middle.z;
-            mark.localPosition = position;
         }
 
         private void RaiseLeft()

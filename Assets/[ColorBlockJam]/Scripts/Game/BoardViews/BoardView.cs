@@ -91,15 +91,15 @@ namespace ColorBlockJam.Game.BoardViews
 
         /// <summary>
         /// Plays a block leaving through a door: the block lines up on the cell it left from and goes
-        /// into the door by its own length. The session has already removed the block.
+        /// into the door by its own length, turning into cubes as it goes. The session has already removed the block.
         /// </summary>
         public void PlayExit(Block block, Cell origin, Door door)
         {
             Cell step = door.Side.OutwardStep();
             int cells = door.Side.RunsAlongX() ? block.Height : block.Width;
             Vector3 doorstep = BlockPosition(BoardPoint.FromCell(origin));
-            _blocks[block.Id].Leave(doorstep, new Vector3(step.X, 0f, step.Y) * (cells * BoardSpace.CellSize));
-            _frame.LetOut(block, origin, door);
+            ExitEffect cubes = _frame.LetOut(block, origin, door);
+            _blocks[block.Id].Leave(doorstep, new Vector3(step.X, 0f, step.Y) * (cells * BoardSpace.CellSize), cubes);
             ShowIce();
         }
 
