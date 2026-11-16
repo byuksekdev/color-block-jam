@@ -6,7 +6,7 @@ namespace ColorBlockJam.Game.UI
     /// Keeps a panel out from under the notch and the home indicator. The panel must stretch over
     /// its whole canvas; this moves its top and bottom anchors to the safe part of the screen.
     /// </summary>
-    [RequireComponent(typeof(RectTransform))]
+    [RequireComponent(typeof(RectTransform)), ExecuteAlways]
     public sealed class SafeArea : MonoBehaviour
     {
         [SerializeField] private bool _fitsTop = true;
@@ -21,6 +21,17 @@ namespace ColorBlockJam.Game.UI
             _rect = (RectTransform)transform;
             Apply();
         }
+
+#if UNITY_EDITOR
+        private void Update()
+        {
+            if (!Application.isPlaying)
+            {
+                _rect = (RectTransform)transform;
+                Apply();
+            }
+        }
+#endif
 
         /// <summary>The canvas tells its children when the screen changes size, which is also when the safe area can change.</summary>
         private void OnRectTransformDimensionsChange()
