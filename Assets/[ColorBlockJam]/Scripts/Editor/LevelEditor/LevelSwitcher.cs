@@ -7,7 +7,7 @@ using UnityEngine;
 namespace ColorBlockJam.LevelEditor
 {
     /// <summary>
-    /// Opens, creates, deletes, reorders, saves and plays levels for the editor window. It asks the
+    /// Opens, creates, duplicates, deletes, reorders, saves and plays levels for the editor window. It asks the
     /// designer before changes would be lost, a level is deleted, or a level that cannot be solved is saved.
     /// </summary>
     internal sealed class LevelSwitcher
@@ -16,6 +16,7 @@ namespace ColorBlockJam.LevelEditor
         private const int NewTimeLimitSeconds = 300;
         private const int SaveChoice = 0;
         private const int CancelChoice = 1;
+        private const string UncheckedNotice = "Saved. The level is too open to check whether it can be solved: play it to make sure.";
 
         private readonly LevelLibrary _library;
         private readonly OpenLevel _open;
@@ -31,6 +32,9 @@ namespace ColorBlockJam.LevelEditor
 
         /// <summary>The open level, its file or the list of levels changed.</summary>
         public event Action Changed;
+
+        /// <summary>Something the designer should know that needs no answer, in words for the designer.</summary>
+        public event Action<string> Noticed;
 
         /// <summary>Opens the first level when none is open yet.</summary>
         public void OpenFirst()
@@ -68,6 +72,21 @@ namespace ColorBlockJam.LevelEditor
             Changed?.Invoke();
         }
 
+        /// <summary>Makes a new level from the saved state of the open one and opens it. The copy joins the end of the list.</summary>
+        public void Duplicate()
+        {
+            if (!TryLeave())
+            {
+                return;
+            }
+
+            TextAsset original = _open.File;
+            TextAsset copy = _library.Create(_library.Load(original));
+            Load(copy);
+            Changed?.Invoke();
+            Noticed?.Invoke(copy.name + " is a copy of " + original.name + ".");
+        }
+
         public void Delete()
         {
             string question = "Delete " + _open.File.name + "? This cannot be undone.";
@@ -97,13 +116,18 @@ namespace ColorBlockJam.LevelEditor
         /// <summary>Saves the open level. Returns false when the designer kept a level that cannot be solved from being saved.</summary>
         public bool Save()
         {
-            if (!ConfirmUnsolvable())
+            if (!ConfirmSolvable(out bool isUnchecked))
             {
                 return false;
             }
 
             _library.Save(_open.File, _open.Data);
             Changed?.Invoke();
+            if (isUnchecked)
+            {
+                Noticed?.Invoke(UncheckedNotice);
+            }
+
             return true;
         }
 
@@ -155,15 +179,18 @@ namespace ColorBlockJam.LevelEditor
         /// <summary>
         /// Warns when the level cannot be solved and lets the designer save it anyway. A level that is
         /// not well formed is not tried: the problems list already says what is wrong with it.
+        /// isUnchecked is true when the level has too many positions for the solver to give an answer.
         /// </summary>
-        private bool ConfirmUnsolvable()
+        private bool ConfirmSolvable(out bool isUnchecked)
         {
+            isUnchecked = false;
             if (LevelValidator.Validate(_open.Data).Count > 0)
             {
                 return true;
             }
 
             SolverResult result = LevelSolver.Solve(_open.Data);
+            isUnchecked = result.Solvability == Solvability.Unknown;
             if (result.Solvability != Solvability.Unsolvable)
             {
                 return true;

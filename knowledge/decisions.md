@@ -52,11 +52,11 @@ The axis and the ice counts were added later with zero as "none", so a file writ
 **Alternatives:** an editor scene inside the game. Files written on a device do not reach the project, and it needs a second set of runtime UI.
 
 ## The editor window is a view; editing rules are logic
-**Decision:** what the editor may do to a level (place and move a block, place a door, resize the board) lives in `Scripts/Core/Editing/` and is tested there. The window only shows the level and forwards the designer's input. Each board tool is one class behind a small interface, and every change goes through one method that records an undo step. Opening, creating, deleting, saving and playing a level is a class of its own beside the window, the level switcher, which asks before anything is lost.
+**Decision:** what the editor may do to a level (place and move a block, place a door, resize the board) lives in `Scripts/Core/Editing/` and is tested there. The window only shows the level and forwards the designer's input. Each board tool is one class behind a small interface, and every change goes through one method that records an undo step. Opening, creating, deleting, saving and playing a level is a class of its own beside the window, the level switcher, which asks before anything is lost. Making the board smaller asks first when it would remove a block or remove or shorten a door, and names what goes; the same rule that counts the loss makes the change, so the count cannot differ from what is removed. A problem of the level check and a solver answer about one block or door carry that part, and the editor outlines it on the board while the pointer is over the line. The level check also offers the solvability check on request; it does not run on every change, because a large level can take the solver a moment. A level can be duplicated: the copy is made from the saved file and joins the end of the list.
 **Why:** the editor follows the same separation as the game, so an editing rule cannot differ between two tools, and a new tool is one new class.
 
 ## Play starts from the level editor
-**Decision:** the Play button of the editor saves the open level, enters Play Mode in the game scene whichever scene is open, and starts that level directly. In Play Mode the button switches the running game to the open level. The button is off while the level check lists a problem.
+**Decision:** the Play button of the editor saves the open level, enters Play Mode in the game scene whichever scene is open, and starts that level directly. In Play Mode the button switches the running game to the open level; when another scene is playing, such as the home scene, it loads the game scene first. The button is off while the level check lists a problem.
 **Why:** the designer tries a level with one click and never plays a level the game would refuse. The request is kept in the editor session because entering Play Mode reloads the editor's code; the game itself knows nothing about the editor.
 
 ## One palette for block colours
@@ -82,7 +82,7 @@ The axis and the ice counts were added later with zero as "none", so a file writ
 
 ## The board is built from the session, out of pooled prefabs
 **Decision:** the board view shows everything of a level (ground, frame, doors, blocks) when a session starts, from the session's read-only board. Each kind of part is a prefab in `Prefabs/Board/` (`Block`, `Door`, `Wall`, `WallCorner`, `Ground`, `ExitEffect`), and `Board` is the prefab that holds them together with one Lean Pool pool per part. A restart gives every part back to its pool and takes it out again. No level has scene content or a prefab of its own.
-**Why:** a level file is enough to show a level, so a level made in the editor plays without any other step, and a board of any size uses the same code path. What a part looks like, where its mesh sits and how it moves is set on its prefab, so a change to the art or the feel needs no code. Restart, which a player presses often, creates no objects.
+**Why:** a level file is enough to show a level, so a level made in the editor plays without any other step, and a board of any size uses the same code path. What a part looks like, where its mesh sits and how it moves is set on its prefab, so a change to the art or the feel needs no code. Restart, which a player presses often, creates no game objects; only the mesh of each block is built again from the level.
 **Alternatives:** building the parts in code with `new GameObject`, which was the first version: it put mesh offsets and animation times into the scripts and made every visual change a code change. The pools are components in the scene and are passed to the views, so the pool plugin's static entry point is not used.
 
 ## Ice is a count in the level; what is left is worked out
@@ -96,7 +96,7 @@ The axis and the ice counts were added later with zero as "none", so a file writ
 ## The solver lets out whichever block it can, then starts again
 **Decision:** `LevelSolver` answers solvable, unsolvable or unknown. It first rejects what can be seen without a search: a block that reaches no door of its colour even alone on the board, and ice that can never melt because too many blocks wait for each other. Then it searches the positions the blocks can be moved into, nearest first, until some block can be walked to its door; that block leaves and the search starts again from there. The search has a limit of positions; past it the answer is unknown.
 **Why:** a block that leaves never makes the rest harder: it frees cells, melts ice, and every move made to let it out can be taken back. So the order of exits never has to be tried, only whether a next exit exists, which keeps the search small on real levels. The solver uses the same board and exit rule as the game, so it cannot disagree with it.
-**Alternatives:** a search over every order of moves and exits, which grows too fast to run on save. The editor warns only on "unsolvable"; "unknown" saves without a warning, because a wrong warning teaches the designer to ignore it.
+**Alternatives:** a search over every order of moves and exits, which grows too fast to run on save. The editor warns only on "unsolvable", because a wrong warning teaches the designer to ignore it. On "unknown" it saves and shows a short note in the window that the check could not answer, which asks for no click.
 
 ## A tool brings its own options
 **Decision:** a board tool of the editor can hand over an element with its own choices (the ice count of the Ice tool, the direction of the Arrow tool), which the tool panel shows while that tool is chosen.
@@ -194,5 +194,5 @@ The axis and the ice counts were added later with zero as "none", so a file writ
 ## Open
 
 - **Third-party plugins**: DOTween (UI and board animation) and Lean Pool (the board's pools) are in `Assets/Plugins/`. Record where they came from for the README. The exit effect adds no art: it draws Unity's built-in cube with the block's material.
-- **Large open levels are not checked**: the solver stops after a set number of positions and answers "unknown", and the editor then saves without a warning.
+- **Large open levels are not checked**: the solver stops after a set number of positions and answers "unknown"; the editor then saves and only notes that the level was not checked.
 - **Settings have no effect yet**: the vibration, sound and music switches are saved and shown, but nothing in the game listens to them. There are no audio assets in the supplied art.

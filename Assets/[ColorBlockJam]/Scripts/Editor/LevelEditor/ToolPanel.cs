@@ -68,7 +68,7 @@ namespace ColorBlockJam.LevelEditor
 
         private void AddToolButtons()
         {
-            VisualElement row = AddSection("Tool", "button-row");
+            VisualElement row = AddSection("Tool", "wrap-row");
             for (int i = 0; i < _tools.Count; i++)
             {
                 int toolIndex = i;

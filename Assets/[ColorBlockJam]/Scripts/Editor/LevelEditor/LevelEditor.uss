@@ -147,6 +147,16 @@
     color: rgb(110, 200, 110);
 }
 
+.points-at-part {
+    border-radius: 3px;
+    padding: 1px 3px;
+    margin-left: -3px;
+}
+
+.points-at-part:hover {
+    background-color: rgba(255, 216, 51, 0.15);
+}
+
 .play-button {
     margin-left: 6px;
     -unity-font-style: bold;

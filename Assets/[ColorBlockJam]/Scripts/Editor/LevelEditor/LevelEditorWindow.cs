@@ -91,6 +91,7 @@ namespace ColorBlockJam.LevelEditor
             _library = new LevelLibrary();
             _levels = new LevelSwitcher(_library, _open, this);
             _levels.Changed += RefreshAll;
+            _levels.Noticed += message => ShowNotification(new GUIContent(message));
             _palette = EditorAssets.FindPalette();
             _eraseTool = new EraseTool(this);
             _tools = new IBoardTool[]
@@ -127,10 +128,11 @@ namespace ColorBlockJam.LevelEditor
             _levelList.LevelChosen += _levels.Choose;
             _levelList.LevelMoved += _levels.Move;
             _levelList.NewRequested += _levels.New;
+            _levelList.DuplicateRequested += _levels.Duplicate;
             _levelList.DeleteRequested += _levels.Delete;
 
             _settings = new BoardSettingsPanel(LevelValidator.MinBoardSize, MaxBoardSize);
-            _settings.SizeChosen += (width, height) => Edit("Resize Board", level => LevelEditing.Resize(level, width, height));
+            _settings.SizeChosen += ResizeBoard;
             _settings.TimeChosen += seconds => Edit("Change Timer", level => level.TimeLimitSeconds = seconds);
 
             _toolPanel = new ToolPanel(_tools, _palette);
@@ -141,6 +143,8 @@ namespace ColorBlockJam.LevelEditor
             _toolPanel.MirrorRequested += MirrorShape;
 
             _problems = new ProblemsPanel();
+            _problems.PartPointed += part => _canvas.Point(part);
+            _problems.SolveRequested += () => _problems.ShowSolverResult(LevelSolver.Solve(_open.Data));
 
             var sidebar = new ScrollView();
             sidebar.AddToClassList("sidebar");
@@ -172,6 +176,18 @@ namespace ColorBlockJam.LevelEditor
             main.Add(_canvas);
             main.Add(_emptyState);
             return main;
+        }
+
+        private void ResizeBoard(int width, int height)
+        {
+            ResizeLoss loss = LevelEditing.LossOfResize(_open.Data, width, height);
+            if (loss.IsAnythingLost && !EditorUtility.DisplayDialog("Make the board smaller", loss.Describe(), "Make smaller", "Cancel"))
+            {
+                _settings.Refresh(_open.Data);
+                return;
+            }
+
+            Edit("Resize Board", level => LevelEditing.Resize(level, width, height));
         }
 
         private void ChooseTool(int index)

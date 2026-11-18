@@ -180,6 +180,47 @@ namespace ColorBlockJam.Tests
             CollectionAssert.IsEmpty(LevelValidator.Validate(level));
         }
 
+        [Test]
+        public void LossOfResize_Smaller_CountsWhatResizeTakesAway()
+        {
+            LevelData level = LevelWithRedBar()
+                .WithBlock(BlockColor.Blue, new Cell(0, 0))
+                .WithDoor(BlockColor.Blue, BoardSide.Bottom, 0, 4)
+                .WithDoor(BlockColor.Blue, BoardSide.Right, 3, 1);
+
+            ResizeLoss loss = LevelEditing.LossOfResize(level, 2, 2);
+
+            Assert.AreEqual(1, loss.RemovedBlocks);
+            Assert.AreEqual(1, loss.RemovedDoors);
+            Assert.AreEqual(2, loss.ShortenedDoors);
+            Assert.IsTrue(loss.IsAnythingLost);
+        }
+
+        [Test]
+        public void LossOfResize_Smaller_LeavesTheLevelUnchanged()
+        {
+            LevelData level = LevelWithRedBar();
+
+            LevelEditing.LossOfResize(level, 2, 2);
+
+            Assert.AreEqual(4, level.Width);
+            Assert.AreEqual(1, level.Blocks.Count);
+            Assert.AreEqual(2, level.Doors[0].Length);
+        }
+
+        [Test]
+        public void LossOfResize_EverythingStillFitsAtTheNewEdge_LosesNothing()
+        {
+            LevelData level = TestLevel.Create(4, 4)
+                .WithBlock(BlockColor.Red, new Cell(2, 2))
+                .WithDoor(BlockColor.Red, BoardSide.Top, 1, 2)
+                .WithDoor(BlockColor.Red, BoardSide.Left, 2, 1);
+
+            ResizeLoss loss = LevelEditing.LossOfResize(level, 3, 3);
+
+            Assert.IsFalse(loss.IsAnythingLost);
+        }
+
         [TestCase(3, 3)]
         [TestCase(-2, 0)]
         [TestCase(500, LevelEditing.MaxIceCount)]

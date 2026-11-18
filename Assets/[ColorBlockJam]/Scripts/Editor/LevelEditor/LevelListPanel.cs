@@ -13,6 +13,7 @@ namespace ColorBlockJam.LevelEditor
 
         private readonly List<string> _names = new List<string>();
         private readonly ListView _list;
+        private readonly Button _duplicateButton;
         private readonly Button _deleteButton;
 
         public LevelListPanel()
@@ -37,6 +38,8 @@ namespace ColorBlockJam.LevelEditor
             var buttons = new VisualElement();
             buttons.AddToClassList("button-row");
             buttons.Add(new Button(() => NewRequested?.Invoke()) { text = "New Level" });
+            _duplicateButton = new Button(() => DuplicateRequested?.Invoke()) { text = "Duplicate" };
+            buttons.Add(_duplicateButton);
             _deleteButton = new Button(() => DeleteRequested?.Invoke()) { text = "Delete" };
             buttons.Add(_deleteButton);
             Add(buttons);
@@ -45,6 +48,7 @@ namespace ColorBlockJam.LevelEditor
         public event Action<int> LevelChosen;
         public event Action<int, int> LevelMoved;
         public event Action NewRequested;
+        public event Action DuplicateRequested;
         public event Action DeleteRequested;
 
         public void Refresh(IReadOnlyList<string> names, int selectedIndex)
@@ -55,6 +59,7 @@ namespace ColorBlockJam.LevelEditor
 
             bool hasSelection = selectedIndex >= 0;
             _list.SetSelectionWithoutNotify(hasSelection ? new[] { selectedIndex } : Array.Empty<int>());
+            _duplicateButton.SetEnabled(hasSelection);
             _deleteButton.SetEnabled(hasSelection);
         }
 

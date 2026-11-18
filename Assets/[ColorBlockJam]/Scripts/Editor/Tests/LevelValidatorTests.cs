@@ -206,5 +206,50 @@ namespace ColorBlockJam.Tests
             Assert.AreEqual(LevelProblemKind.DoorColorUnknown, problems[2].Kind);
             Assert.AreEqual(LevelProblemKind.DoorSideUnknown, problems[3].Kind);
         }
+
+        [Test]
+        public void Validate_ProblemOfOneBlock_PointsAtThatBlock()
+        {
+            LevelData level = ValidLevel().WithBlock(BlockColor.Red, new Cell(1, 1));
+
+            List<LevelProblem> problems = LevelValidator.Validate(level);
+
+            Assert.AreEqual(1, problems.Count);
+            Assert.AreEqual(LevelPart.Block(1), problems[0].Part);
+        }
+
+        [Test]
+        public void Validate_BlockColourWithoutDoor_PointsAtTheBlock()
+        {
+            LevelData level = ValidLevel().WithBlock(BlockColor.Blue, new Cell(0, 0));
+
+            List<LevelProblem> problems = LevelValidator.Validate(level);
+
+            Assert.AreEqual(1, problems.Count);
+            Assert.AreEqual(LevelPart.Block(1), problems[0].Part);
+        }
+
+        [Test]
+        public void Validate_ProblemOfOneDoor_PointsAtThatDoor()
+        {
+            LevelData level = ValidLevel().WithDoor(BlockColor.Red, BoardSide.Top, 0, 2);
+
+            List<LevelProblem> problems = LevelValidator.Validate(level);
+
+            Assert.AreEqual(1, problems.Count);
+            Assert.AreEqual(LevelPart.Door(1), problems[0].Part);
+        }
+
+        [Test]
+        public void Validate_ProblemOfTheWholeLevel_PointsAtNoPart()
+        {
+            LevelData level = ValidLevel();
+            level.TimeLimitSeconds = 0;
+
+            List<LevelProblem> problems = LevelValidator.Validate(level);
+
+            Assert.AreEqual(1, problems.Count);
+            Assert.AreEqual(LevelPartKind.None, problems[0].Part.Kind);
+        }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ColorBlockJam.Core.Data;
 using ColorBlockJam.Core.Editing;
+using ColorBlockJam.Core.Validation;
 using ColorBlockJam.Game.Visuals;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,12 +18,14 @@ namespace ColorBlockJam.LevelEditor
         private const float PreviewAlpha = 0.65f;
         private const float FadedAlpha = 0.25f;
         private const float IceAlpha = 0.7f;
+        private const float PointedLineWidth = 3f;
 
         private static readonly Color BoardColor = new Color(0.17f, 0.2f, 0.29f);
         private static readonly Color CellColor = new Color(0.36f, 0.41f, 0.53f);
         private static readonly Color DoorSlotColor = new Color(1f, 1f, 1f, 0.07f);
         private static readonly Color InvalidColor = new Color(0.9f, 0.15f, 0.15f);
         private static readonly Color IceColor = new Color(0.62f, 0.86f, 1f);
+        private static readonly Color PointedColor = new Color(1f, 0.85f, 0.2f);
 
         private readonly List<Cell> _previewCells = new List<Cell>();
         private readonly IceCountLabels _iceCounts = new IceCountLabels();
@@ -31,6 +34,7 @@ namespace ColorBlockJam.LevelEditor
         private Color _previewColor;
         private DoorData _previewDoor;
         private int _fadedBlock = LevelEditing.NotFound;
+        private LevelPart _pointed;
 
         public BoardCanvas()
         {
@@ -54,6 +58,7 @@ namespace ColorBlockJam.LevelEditor
         {
             _level = level;
             _palette = palette;
+            _pointed = default;
             ShowIceCounts();
             MarkDirtyRepaint();
         }
@@ -83,6 +88,13 @@ namespace ColorBlockJam.LevelEditor
             int start = Mathf.Clamp(Mathf.Min(from, to), 0, lastPosition);
             int end = Mathf.Clamp(Mathf.Max(from, to), 0, lastPosition);
             _previewDoor = new DoorData { Color = color, Side = side, Start = start, Length = end - start + 1 };
+        }
+
+        /// <summary>Marks the block or door that the designer points at in the level check. The default part marks nothing.</summary>
+        public void Point(LevelPart part)
+        {
+            _pointed = part;
+            MarkDirtyRepaint();
         }
 
         public void ClearPreview()
@@ -168,6 +180,7 @@ namespace ColorBlockJam.LevelEditor
             DrawDoors(painter, layout);
             DrawBlocks(painter, layout);
             DrawPreview(painter, layout);
+            DrawPointed(painter, layout);
         }
 
         private void DrawBoard(Painter2D painter, BoardLayout layout)
@@ -249,6 +262,19 @@ namespace ColorBlockJam.LevelEditor
             if (_previewDoor != null)
             {
                 DrawDoor(painter, layout, _previewDoor, PreviewAlpha);
+            }
+        }
+
+        private void DrawPointed(Painter2D painter, BoardLayout layout)
+        {
+            if (_pointed.Kind == LevelPartKind.Block && _pointed.Index < _level.Blocks.Count)
+            {
+                painter.StrokeOutline(layout, _level.Blocks[_pointed.Index].Cells, PointedColor, PointedLineWidth);
+            }
+            else if (_pointed.Kind == LevelPartKind.Door && _pointed.Index < _level.Doors.Count)
+            {
+                DoorData door = _level.Doors[_pointed.Index];
+                painter.StrokeRect(layout.DoorRect(door.Side, door.Start, door.Length, DoorSlotThickness), PointedColor, PointedLineWidth);
             }
         }
 

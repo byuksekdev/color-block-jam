@@ -62,33 +62,34 @@ namespace ColorBlockJam.Core.Validation
             {
                 BlockData block = level.Blocks[i];
                 string name = "Block " + (i + 1);
+                LevelPart part = LevelPart.Block(i);
 
                 if (block.Color == BlockColor.None)
                 {
-                    problems.Add(new LevelProblem(LevelProblemKind.BlockHasNoColor, name + " has no colour."));
+                    problems.Add(new LevelProblem(LevelProblemKind.BlockHasNoColor, name + " has no colour.", part));
                 }
                 else if (!Enum.IsDefined(typeof(BlockColor), block.Color))
                 {
-                    problems.Add(new LevelProblem(LevelProblemKind.BlockColorUnknown, name + " has a colour that this build does not know."));
+                    problems.Add(new LevelProblem(LevelProblemKind.BlockColorUnknown, name + " has a colour that this build does not know.", part));
                 }
 
                 if (!Enum.IsDefined(typeof(BlockAxis), block.Axis))
                 {
-                    problems.Add(new LevelProblem(LevelProblemKind.BlockAxisUnknown, name + " has a direction that this build does not know."));
+                    problems.Add(new LevelProblem(LevelProblemKind.BlockAxisUnknown, name + " has a direction that this build does not know.", part));
                 }
 
                 if (block.Cells.Count == 0)
                 {
-                    problems.Add(new LevelProblem(LevelProblemKind.BlockHasNoCells, name + " has no cell."));
+                    problems.Add(new LevelProblem(LevelProblemKind.BlockHasNoCells, name + " has no cell.", part));
                     continue;
                 }
 
                 if (block.IceCount < 0)
                 {
-                    problems.Add(new LevelProblem(LevelProblemKind.IceCountNegative, name + " has an ice count below zero."));
+                    problems.Add(new LevelProblem(LevelProblemKind.IceCountNegative, name + " has an ice count below zero.", part));
                 }
 
-                CheckBlockCells(level, block, name, takenCells, problems);
+                CheckBlockCells(level, block, name, part, takenCells, problems);
             }
         }
 
@@ -96,6 +97,7 @@ namespace ColorBlockJam.Core.Validation
             LevelData level,
             BlockData block,
             string name,
+            LevelPart part,
             HashSet<Cell> takenCells,
             List<LevelProblem> problems)
         {
@@ -117,12 +119,12 @@ namespace ColorBlockJam.Core.Validation
 
             if (isOutside)
             {
-                problems.Add(new LevelProblem(LevelProblemKind.BlockOutsideBoard, name + " lies partly outside the board."));
+                problems.Add(new LevelProblem(LevelProblemKind.BlockOutsideBoard, name + " lies partly outside the board.", part));
             }
 
             if (overlaps)
             {
-                problems.Add(new LevelProblem(LevelProblemKind.BlocksOverlap, name + " covers a cell that is already taken."));
+                problems.Add(new LevelProblem(LevelProblemKind.BlocksOverlap, name + " covers a cell that is already taken.", part));
             }
         }
 
@@ -132,37 +134,38 @@ namespace ColorBlockJam.Core.Validation
             {
                 DoorData door = level.Doors[i];
                 string name = "Door " + (i + 1);
+                LevelPart part = LevelPart.Door(i);
 
                 if (door.Color == BlockColor.None)
                 {
-                    problems.Add(new LevelProblem(LevelProblemKind.DoorHasNoColor, name + " has no colour."));
+                    problems.Add(new LevelProblem(LevelProblemKind.DoorHasNoColor, name + " has no colour.", part));
                 }
                 else if (!Enum.IsDefined(typeof(BlockColor), door.Color))
                 {
-                    problems.Add(new LevelProblem(LevelProblemKind.DoorColorUnknown, name + " has a colour that this build does not know."));
+                    problems.Add(new LevelProblem(LevelProblemKind.DoorColorUnknown, name + " has a colour that this build does not know.", part));
                 }
 
                 if (!Enum.IsDefined(typeof(BoardSide), door.Side))
                 {
-                    problems.Add(new LevelProblem(LevelProblemKind.DoorSideUnknown, name + " stands on a side of the board that this build does not know."));
+                    problems.Add(new LevelProblem(LevelProblemKind.DoorSideUnknown, name + " stands on a side of the board that this build does not know.", part));
                     continue;
                 }
 
                 if (door.IceCount < 0)
                 {
-                    problems.Add(new LevelProblem(LevelProblemKind.IceCountNegative, name + " has an ice count below zero."));
+                    problems.Add(new LevelProblem(LevelProblemKind.IceCountNegative, name + " has an ice count below zero.", part));
                 }
 
                 int sideLength = door.Side.RunsAlongX() ? level.Width : level.Height;
                 if (door.Length < 1 || door.Start < 0 || door.Start + door.Length > sideLength)
                 {
-                    problems.Add(new LevelProblem(LevelProblemKind.DoorOutsideSide, name + " does not fit on its side of the board."));
+                    problems.Add(new LevelProblem(LevelProblemKind.DoorOutsideSide, name + " does not fit on its side of the board.", part));
                     continue;
                 }
 
                 if (OverlapsEarlierDoor(level, i))
                 {
-                    problems.Add(new LevelProblem(LevelProblemKind.DoorsOverlap, name + " overlaps another door on the same side."));
+                    problems.Add(new LevelProblem(LevelProblemKind.DoorsOverlap, name + " overlaps another door on the same side.", part));
                 }
             }
         }
@@ -203,7 +206,8 @@ namespace ColorBlockJam.Core.Validation
 
                 problems.Add(new LevelProblem(
                     LevelProblemKind.BlockColorWithoutDoor,
-                    "No door has the colour " + color + " of block " + (i + 1) + "."));
+                    "No door has the colour " + color + " of block " + (i + 1) + ".",
+                    LevelPart.Block(i)));
             }
         }
     }

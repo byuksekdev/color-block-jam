@@ -27,6 +27,7 @@ namespace ColorBlockJam.Tests
 
             Assert.AreEqual(Solvability.Unsolvable, result.Solvability);
             StringAssert.Contains("Block 1", result.Reason);
+            Assert.AreEqual(LevelPart.Block(0), result.Part);
         }
 
         [Test]

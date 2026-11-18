@@ -13,7 +13,7 @@ namespace ColorBlockJam.Core.Editing
 
         public static int SideLength(LevelData level, BoardSide side)
         {
-            return side.RunsAlongX() ? level.Width : level.Height;
+            return SideLength(side, level.Width, level.Height);
         }
 
         public static int FindBlockAt(LevelData level, Cell cell)
@@ -138,6 +138,37 @@ namespace ColorBlockJam.Core.Editing
             level.Doors.Add(new DoorData { Color = color, Side = side, Start = start, Length = end - start + 1 });
         }
 
+        /// <summary>What Resize to this size would remove or shorten. The level is not changed.</summary>
+        public static ResizeLoss LossOfResize(LevelData level, int width, int height)
+        {
+            int removedBlocks = 0;
+            for (int i = 0; i < level.Blocks.Count; i++)
+            {
+                if (!FitsBoard(level.Blocks[i].Cells, width, height))
+                {
+                    removedBlocks++;
+                }
+            }
+
+            int removedDoors = 0;
+            int shortenedDoors = 0;
+            for (int i = 0; i < level.Doors.Count; i++)
+            {
+                DoorData door = level.Doors[i];
+                int sideLength = SideLength(door.Side, width, height);
+                if (door.Start >= sideLength)
+                {
+                    removedDoors++;
+                }
+                else if (door.Start + door.Length > sideLength)
+                {
+                    shortenedDoors++;
+                }
+            }
+
+            return new ResizeLoss(removedBlocks, removedDoors, shortenedDoors);
+        }
+
         /// <summary>Changes the board size. Blocks that no longer fit are removed, and doors are shortened or removed.</summary>
         public static void Resize(LevelData level, int width, int height)
         {
@@ -146,7 +177,7 @@ namespace ColorBlockJam.Core.Editing
 
             for (int i = level.Blocks.Count - 1; i >= 0; i--)
             {
-                if (!CanPlaceBlock(level, level.Blocks[i].Cells, new Cell(0, 0), i))
+                if (!FitsBoard(level.Blocks[i].Cells, width, height))
                 {
                     level.Blocks.RemoveAt(i);
                 }
@@ -155,7 +186,7 @@ namespace ColorBlockJam.Core.Editing
             for (int i = level.Doors.Count - 1; i >= 0; i--)
             {
                 DoorData door = level.Doors[i];
-                int sideLength = SideLength(level, door.Side);
+                int sideLength = SideLength(door.Side, width, height);
                 if (door.Start >= sideLength)
                 {
                     level.Doors.RemoveAt(i);
@@ -165,6 +196,25 @@ namespace ColorBlockJam.Core.Editing
                     door.Length = Math.Min(door.Length, sideLength - door.Start);
                 }
             }
+        }
+
+        private static int SideLength(BoardSide side, int width, int height)
+        {
+            return side.RunsAlongX() ? width : height;
+        }
+
+        private static bool FitsBoard(IReadOnlyList<Cell> cells, int width, int height)
+        {
+            for (int i = 0; i < cells.Count; i++)
+            {
+                Cell cell = cells[i];
+                if (cell.X < 0 || cell.X >= width || cell.Y < 0 || cell.Y >= height)
+                {
+                    return false;
+                }
+            }
+
+            return cells.Count > 0;
         }
     }
 }

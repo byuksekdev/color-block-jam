@@ -55,7 +55,13 @@ namespace ColorBlockJam.Core.Validation
 
         private SolverResult Solve()
         {
-            if (TryFindBlockWithoutDoor(out string reason) || TryFindIceThatNeverMelts(out reason))
+            if (TryFindBlockWithoutDoor(out int blockIndex))
+            {
+                string noDoor = "Block " + (blockIndex + 1) + " can never leave: no door of its colour is wide enough for it and lies where it can move to.";
+                return new SolverResult(Solvability.Unsolvable, noDoor, LevelPart.Block(blockIndex));
+            }
+
+            if (TryFindIceThatNeverMelts(out string reason))
             {
                 return new SolverResult(Solvability.Unsolvable, reason);
             }
@@ -83,18 +89,16 @@ namespace ColorBlockJam.Core.Validation
         }
 
         /// <summary>A block that reaches no door of its colour on an otherwise empty board never leaves.</summary>
-        private bool TryFindBlockWithoutDoor(out string reason)
+        private bool TryFindBlockWithoutDoor(out int blockIndex)
         {
-            for (int i = 0; i < _level.Blocks.Count; i++)
+            for (blockIndex = 0; blockIndex < _level.Blocks.Count; blockIndex++)
             {
-                if (_doorIce[i] == NoDoor)
+                if (_doorIce[blockIndex] == NoDoor)
                 {
-                    reason = "Block " + (i + 1) + " can never leave: no door of its colour is wide enough for it and lies where it can move to.";
                     return true;
                 }
             }
 
-            reason = string.Empty;
             return false;
         }
 
