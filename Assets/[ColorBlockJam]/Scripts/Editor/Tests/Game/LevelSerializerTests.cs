@@ -24,11 +24,16 @@ namespace ColorBlockJam.Tests.Game
 
         private static LevelData SampleLevel()
         {
-            return TestLevel.Create(5, 6)
+            LevelData level = TestLevel.Create(5, 6)
                 .WithBlock(BlockColor.Blue, new Cell(1, 4), new Cell(2, 4), new Cell(1, 3))
                 .WithBlock(BlockColor.Red, new Cell(4, 0))
                 .WithDoor(BlockColor.Blue, BoardSide.Top, 0, 2)
                 .WithDoor(BlockColor.Red, BoardSide.Right, 3, 2);
+
+            level.Blocks[0].Axis = BlockAxis.Vertical;
+            level.Blocks[1].IceCount = 1;
+            level.Doors[0].IceCount = 1;
+            return level;
         }
 
         private static void AssertSameLevel(LevelData expected, LevelData actual)
@@ -43,6 +48,8 @@ namespace ColorBlockJam.Tests.Game
             {
                 Assert.AreEqual(expected.Blocks[i].Color, actual.Blocks[i].Color);
                 CollectionAssert.AreEqual(expected.Blocks[i].Cells, actual.Blocks[i].Cells);
+                Assert.AreEqual(expected.Blocks[i].Axis, actual.Blocks[i].Axis);
+                Assert.AreEqual(expected.Blocks[i].IceCount, actual.Blocks[i].IceCount);
             }
 
             Assert.AreEqual(expected.Doors.Count, actual.Doors.Count);
@@ -52,6 +59,7 @@ namespace ColorBlockJam.Tests.Game
                 Assert.AreEqual(expected.Doors[i].Side, actual.Doors[i].Side);
                 Assert.AreEqual(expected.Doors[i].Start, actual.Doors[i].Start);
                 Assert.AreEqual(expected.Doors[i].Length, actual.Doors[i].Length);
+                Assert.AreEqual(expected.Doors[i].IceCount, actual.Doors[i].IceCount);
             }
         }
 

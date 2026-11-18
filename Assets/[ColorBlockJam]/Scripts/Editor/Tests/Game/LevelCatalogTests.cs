@@ -9,6 +9,8 @@ namespace ColorBlockJam.Tests.Game
 {
     public class LevelCatalogTests
     {
+        private const int RequiredLevelCount = 5;
+
         private static LevelCatalog LoadProjectCatalog()
         {
             string[] guids = AssetDatabase.FindAssets("t:" + nameof(LevelCatalog));
@@ -20,7 +22,7 @@ namespace ColorBlockJam.Tests.Game
         public void ProjectCatalog_EveryLevel_IsWellFormedAndCanBeSolved()
         {
             LevelCatalog catalog = LoadProjectCatalog();
-            Assert.Greater(catalog.Count, 0, "The level catalog is empty.");
+            Assert.GreaterOrEqual(catalog.Count, RequiredLevelCount, "The game ships at least " + RequiredLevelCount + " levels.");
 
             for (int i = 0; i < catalog.Count; i++)
             {
@@ -29,7 +31,7 @@ namespace ColorBlockJam.Tests.Game
                 Assert.AreEqual(0, problems.Count, "Level " + (i + 1) + ": " + (problems.Count > 0 ? problems[0].Message : string.Empty));
 
                 SolverResult result = LevelSolver.Solve(level);
-                Assert.AreNotEqual(Solvability.Unsolvable, result.Solvability, "Level " + (i + 1) + ": " + result.Reason);
+                Assert.AreEqual(Solvability.Solvable, result.Solvability, "Level " + (i + 1) + ": " + result.Reason);
             }
         }
     }
