@@ -15,6 +15,7 @@ namespace ColorBlockJam.Game.UI
         [SerializeField] private Button _settingsButton;
         [SerializeField] private TMP_Text _levelLabel;
         [SerializeField] private TMP_Text _coinsLabel;
+        [SerializeField] private TMP_Text _currentLevelLabel;
 
         [Tooltip("The levels that come after the current one, nearest first.")]
         [SerializeField] private TMP_Text[] _nextLevelLabels;
@@ -25,6 +26,7 @@ namespace ColorBlockJam.Game.UI
         public void ShowLevel(int levelNumber)
         {
             _levelLabel.text = LevelPrefix + levelNumber.ToString(CultureInfo.InvariantCulture);
+            _currentLevelLabel.text = levelNumber.ToString(CultureInfo.InvariantCulture);
             for (int i = 0; i < _nextLevelLabels.Length; i++)
             {
                 _nextLevelLabels[i].text = (levelNumber + i + 1).ToString(CultureInfo.InvariantCulture);
