@@ -1,0 +1,182 @@
+{
+    "Version": 1,
+    "Width": 6,
+    "Height": 6,
+    "TimeLimitSeconds": 60,
+    "Blocks": [
+        {
+            "Color": 1,
+            "Cells": [
+                {
+                    "X": 0,
+                    "Y": 4
+                },
+                {
+                    "X": 1,
+                    "Y": 4
+                },
+                {
+                    "X": 0,
+                    "Y": 5
+                },
+                {
+                    "X": 1,
+                    "Y": 5
+                }
+            ],
+            "Axis": 0,
+            "IceCount": 0
+        },
+        {
+            "Color": 4,
+            "Cells": [
+                {
+                    "X": 4,
+                    "Y": 4
+                },
+                {
+                    "X": 5,
+                    "Y": 4
+                },
+                {
+                    "X": 4,
+                    "Y": 5
+                },
+                {
+                    "X": 5,
+                    "Y": 5
+                }
+            ],
+            "Axis": 0,
+            "IceCount": 4
+        },
+        {
+            "Color": 3,
+            "Cells": [
+                {
+                    "X": 0,
+                    "Y": 0
+                },
+                {
+                    "X": 1,
+                    "Y": 0
+                },
+                {
+                    "X": 0,
+                    "Y": 1
+                },
+                {
+                    "X": 1,
+                    "Y": 1
+                }
+            ],
+            "Axis": 0,
+            "IceCount": 0
+        },
+        {
+            "Color": 7,
+            "Cells": [
+                {
+                    "X": 4,
+                    "Y": 0
+                },
+                {
+                    "X": 5,
+                    "Y": 0
+                },
+                {
+                    "X": 4,
+                    "Y": 1
+                },
+                {
+                    "X": 5,
+                    "Y": 1
+                }
+            ],
+            "Axis": 2,
+            "IceCount": 0
+        },
+        {
+            "Color": 8,
+            "Cells": [
+                {
+                    "X": 1,
+                    "Y": 3
+                },
+                {
+                    "X": 2,
+                    "Y": 3
+                },
+                {
+                    "X": 3,
+                    "Y": 3
+                }
+            ],
+            "Axis": 1,
+            "IceCount": 0
+        },
+        {
+            "Color": 2,
+            "Cells": [
+                {
+                    "X": 2,
+                    "Y": 2
+                },
+                {
+                    "X": 3,
+                    "Y": 2
+                },
+                {
+                    "X": 4,
+                    "Y": 2
+                }
+            ],
+            "Axis": 0,
+            "IceCount": 3
+        }
+    ],
+    "Doors": [
+        {
+            "Color": 8,
+            "Side": 1,
+            "Start": 2,
+            "Length": 2,
+            "IceCount": 0
+        },
+        {
+            "Color": 2,
+            "Side": 0,
+            "Start": 4,
+            "Length": 2,
+            "IceCount": 0
+        },
+        {
+            "Color": 7,
+            "Side": 3,
+            "Start": 4,
+            "Length": 2,
+            "IceCount": 0
+        },
+        {
+            "Color": 1,
+            "Side": 0,
+            "Start": 0,
+            "Length": 2,
+            "IceCount": 0
+        },
+        {
+            "Color": 4,
+            "Side": 2,
+            "Start": 2,
+            "Length": 2,
+            "IceCount": 5
+        },
+        {
+            "Color": 3,
+            "Side": 3,
+            "Start": 1,
+            "Length": 2,
+            "IceCount": 2
+        }
+    ]
+}

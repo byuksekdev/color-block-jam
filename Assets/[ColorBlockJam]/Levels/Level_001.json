@@ -2,7 +2,7 @@
     "Version": 1,
     "Width": 4,
     "Height": 5,
-    "TimeLimitSeconds": 300,
+    "TimeLimitSeconds": 60,
     "Blocks": [
         {
             "Color": 8,
@@ -23,7 +23,9 @@
                     "X": 1,
                     "Y": 2
                 }
-            ]
+            ],
+            "Axis": 0,
+            "IceCount": 0
         },
         {
             "Color": 6,
@@ -44,7 +46,9 @@
                     "X": 3,
                     "Y": 3
                 }
-            ]
+            ],
+            "Axis": 0,
+            "IceCount": 0
         }
     ],
     "Doors": [
@@ -52,13 +56,15 @@
             "Color": 6,
             "Side": 3,
             "Start": 1,
-            "Length": 3
+            "Length": 3,
+            "IceCount": 0
         },
         {
             "Color": 8,
             "Side": 2,
             "Start": 0,
-            "Length": 3
+            "Length": 3,
+            "IceCount": 0
         }
     ]
 }
