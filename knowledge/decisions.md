@@ -111,6 +111,11 @@ The axis and the ice counts were added later with zero as "none", so a file writ
 **Why:** it follows any block shape without extra art or a render feature, and it costs two draw calls for the one block that is held. The mark keeps the edge off the block itself: widening the mesh and drawing its back faces, the first version, also drew an edge around every stud on top of the block. Drawing over everything keeps the edge whole where the block stands against a neighbour.
 **Alternatives:** a full-screen outline pass, which costs every frame for one block, or outline meshes built per shape in code.
 
+## Ice has its own shader
+**Decision:** a frozen block or door is drawn with `Shaders/FrostedIce.mat`, made from `Shaders/FrostedIce.shader` and the supplied ice texture; the block palette points to it. The shader lays the texture on along the world axes, not by the mesh coordinates, and draws the ice as a bright tint that the light shades only a little. The brightest lines of the texture become white cracks, and upright faces, the sides of the block and of its studs, glow, so the studs show as rings. Tint, glow, texture, cracks, edge and highlight are set on the material. The supplied `Ice.mat` is left as it is.
+**Why:** the supplied block parts map the texture onto a small patch that repeats in every quarter, so the URP Lit material showed a flat blue, and URP Lit has no edge glow and shades the ice like any block, so it never looks lit from inside. World mapping lets the cracks run on across cells at one size on blocks and doors. The shader is opaque and has one pass: the game scene casts no shadows, and a frozen piece never takes part in the held-block outline.
+**Alternatives:** tuning `Ice.mat`, which keeps both problems; a transparent material, which brings sorting problems and extra cost for little gain.
+
 ## A held block leans the way it moves
 **Decision:** the `Block` prefab has a `Body` child that stands on the middle of the block and holds its mesh, outline and marks. While a finger holds the block, the view turns the body by the block's speed, smoothed over a short time and limited to a few degrees; on release it stands upright again. The values are on the prefab.
 **Why:** the lean is a look, not a rule: the logic still moves the block's origin, and the cut at the door and the picking of a block read the root, which never turns. Turning a child around the middle keeps a long block from swinging around its corner.
@@ -165,9 +170,13 @@ The axis and the ice counts were added later with zero as "none", so a file writ
 **Decision:** a new player starts with 400 coins. Winning the level the player has reached grants 40 coins, once, at the moment the level is won, and moves the player to the next level. "Continue" works only on a won level, so pressing it twice cannot skip a level. A level that is played again grants nothing and does not move the player. A level started from the level editor is a preview: the flow is told so when the level starts, and restart and the next level stay in it, so nothing the player has changes even when the previewed level is the one the player has reached. Nothing spends coins.
 **Why:** the brief requires a working coin inventory but names no source and no price. The values match the reference game. Granting at the state change keeps the count correct when the player leaves before pressing a button.
 
-## Level 1 and the tutorial hint
-**Decision:** the five levels reproduce levels 1 to 5 of the reference game. The "Swipe to Gate" hand hint of level 1 is not implemented.
-**Why:** a tutorial is not in the required scope.
+## Five levels from the reference game and one bonus level
+**Decision:** levels 1 to 5 reproduce the boards of levels 1 to 5 of the reference game. Level 6 is a bonus level that shows the arrow block, the ice block and the ice door, which the first five levels of the reference game do not have. The "Swipe to Gate" hand hint of level 1 is not implemented.
+**Why:** the brief asks for the first five levels; the arrow block and the ice blocker are optional scope, and a level of their own shows them without changing the five. A tutorial is not in the required scope.
+
+## Every level has a one-minute timer
+**Decision:** every level starts with 01:00 on the timer, where the reference game gives 05:00.
+**Why:** for review and testing: the timeout and the fail popup show after one minute of waiting instead of five, and the levels are short enough to be won within a minute. The timer is a value of each level, set in the level editor, so a level goes back to 05:00 without a code change.
 
 ## Home screen and popups
 **Decision:** the level button starts the level directly; the reference game's popup before a level, with its booster choice, is left out. The level path above the button, the profile box, the lives and the tabs are placeholders that react to a touch. The fail popup is our own design: "Time's Up!" with Try Again and Home.
@@ -183,7 +192,7 @@ The axis and the ice counts were added later with zero as "none", so a file writ
 
 ## After the last level
 **Decision:** the level number keeps counting up and the level content starts again from the first file.
-**Why:** "continue to the next level" must always have a next level, and five levels are shipped.
+**Why:** "continue to the next level" must always have a next level, and six levels are shipped.
 
 ## Android build: IL2CPP with ARM64 and ARMv7
 **Decision:** the Android build uses the IL2CPP scripting backend and targets ARM64 and ARMv7.
@@ -193,6 +202,5 @@ The axis and the ice counts were added later with zero as "none", so a file writ
 
 ## Open
 
-- **Third-party plugins**: DOTween (UI and board animation) and Lean Pool (the board's pools) are in `Assets/Plugins/`. Record where they came from for the README. The exit effect adds no art: it draws Unity's built-in cube with the block's material.
 - **Large open levels are not checked**: the solver stops after a set number of positions and answers "unknown"; the editor then saves and only notes that the level was not checked.
 - **Settings have no effect yet**: the vibration, sound and music switches are saved and shown, but nothing in the game listens to them. There are no audio assets in the supplied art.

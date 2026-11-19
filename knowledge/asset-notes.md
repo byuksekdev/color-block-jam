@@ -15,7 +15,7 @@ The FBX files carry four material slots: `ModularBlock_Base`, `Base_Side`, `Gate
 
 ## Textures and UI
 
-- `VisualAssets/Textures/icetexture.jpg`: ice. `VisualAssets/Materials/Ice.mat` is made from it and covers a block or a door while it is frozen.
+- `VisualAssets/Textures/icetexture.jpg`: ice. The game draws frozen blocks and doors with `Shaders/FrostedIce.mat`, made from this texture; the supplied `VisualAssets/Materials/Ice.mat` is not used.
 - `VisualAssets/UI/`: sprites for the home screen, the tab bar, the gameplay HUD, popups, the settings rows, coins and booster icons.
 
 ## UI sprites in use
@@ -28,6 +28,7 @@ The FBX files carry four material slots: `ModularBlock_Base`, `Base_Side`, `Gate
 
 - `btn_toggle_on.png` has no matching "off" sprite. The off state of a settings toggle has to be made from the same sprite.
 - No material assets and no block colour textures are supplied; block, wall and door materials have to be created.
+- The UVs of the block parts cover a small patch of the texture (`ModularBlock_Center`: 0.23–0.43 by 0–0.37) and repeat in every quarter, so a texture laid on by UV, such as the ice, shows as a small repeating spot.
 - No audio is supplied, so the sound and music toggles can only store and show their state.
 - No font is supplied.
 - The home screen's level path has no sprites (level nodes, rails); the nodes are made from `SquareRoundedMask`.
