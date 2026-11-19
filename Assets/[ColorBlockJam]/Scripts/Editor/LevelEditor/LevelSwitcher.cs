@@ -47,14 +47,21 @@ namespace ColorBlockJam.LevelEditor
 
         public void Choose(int index)
         {
-            if (index < 0 || index >= _library.Count || _library.GetFile(index) == _open.File)
+            if (index < 0 || index >= _library.Count)
+            {
+                return;
+            }
+
+            // Taken before leaving: saving the open level can move it between playable levels and drafts.
+            TextAsset chosen = _library.GetFile(index);
+            if (chosen == _open.File)
             {
                 return;
             }
 
             if (TryLeave())
             {
-                Load(_library.GetFile(index));
+                Load(chosen);
             }
 
             Changed?.Invoke();
