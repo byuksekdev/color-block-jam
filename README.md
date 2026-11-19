@@ -9,6 +9,10 @@ Everything in the required scope is implemented, as are three of the four option
 - **Checked on Android:** the APK was installed and played on an Android 16 emulator at 1080 x 2400 (20:9)
 - **Tests:** 233 EditMode tests on the board rules, the timer, the game flow and coins, the level format, validation and the editing rules, all passing
 
+
+https://github.com/user-attachments/assets/5e95f8b0-eca5-4243-ae56-3156d968c579
+
+
 ## Contents
 
 1. [Open and run the project](#open-and-run-the-project)
