@@ -5,18 +5,15 @@ A vertical slice of Color Block Jam in Unity: home screen, settings, the first f
 Everything in the required scope is implemented, as are three of the four optional items: level validation with a solver, the ice blocker and the arrow block. Boosters are placeholders, which the brief allows.
 
 - **Unity:** 2022.3.62f2, Universal Render Pipeline, portrait, reference resolution 1080 x 1920
-- **Build:** the Android APK and a screen recording of the full flow are on the [latest release](../../releases/latest)
+- **Build:** the Android APK is on the [latest release](../../releases/latest); the [recording below](#gameplay) shows the full flow
 - **Checked on Android:** the APK was installed and played on an Android 16 emulator at 1080 x 2400 (20:9)
 - **Tests:** 233 EditMode tests on the board rules, the timer, the game flow and coins, the level format, validation and the editing rules, all passing
 
+## Gameplay
+
+The home screen and settings, levels 1 to 6 with the ice and arrow blocks, then a time-out on level 7 as the levels start again from the first. The wait before the time-out is sped up 16x.
 
 https://github.com/user-attachments/assets/5e95f8b0-eca5-4243-ae56-3156d968c579
-
-
-
-https://github.com/user-attachments/assets/cb9ac763-a1ae-480b-8ec5-b6bded130bc1
-
-
 
 ## Contents
 
@@ -44,6 +41,8 @@ The player's progress (coins, reached level, settings) is saved in PlayerPrefs. 
 ## Make a level with the editor
 
 The level editor is a Unity Editor window: a level is drawn on a grid, saved and played from the window, with no code and no hand-edited file.
+
+https://github.com/user-attachments/assets/cb9ac763-a1ae-480b-8ec5-b6bded130bc1
 
 Open **Tools > Color Block Jam > Level Editor**.
 
@@ -141,7 +140,6 @@ Every decision, with its reasons and the alternatives that were rejected, is in 
 - The block parts' UVs cover only a small patch of a texture and repeat in every quarter of a cell. A texture laid on by UV, such as the ice texture, shows as a small repeating spot. The ice is therefore drawn with a small custom shader that maps the texture in world space.
 - The models do not share an up axis. The block parts are authored with -Z up, and the door and frame corner lie upside down, so each needs its own rotation.
 - The ground tile is 1.953 units wide against a 2-unit cell, which leaves thin gaps between tiles.
-- Mesh names in `WallAndDoor.fbx` mix cases and keep export leftovers (`Corner_1`, `corner_3`, `corner_3.002`).
 - `btn_toggle_on.png` has no matching "off" sprite.
 - No block materials or colour textures, no audio, no font, no level-path sprites, no avatar and no fail-popup art are supplied.
 
